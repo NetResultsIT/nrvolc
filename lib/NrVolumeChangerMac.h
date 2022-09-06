@@ -5,6 +5,8 @@
 
 class NRVOLC_LIB_EXPORT NrVolumeChangerMacImpl : public NrVolumeChanger
 {
+    int getDefaultInputDeviceId() const;
+    int getDefaultOutputDeviceId() const;
 public:
     NrVolumeChangerMacImpl(QObject *parent=nullptr);
     virtual double getVolume() const;

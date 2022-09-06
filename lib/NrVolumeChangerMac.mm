@@ -15,12 +15,34 @@ NrVolumeChangerMacImpl::NrVolumeChangerMacImpl(QObject *p) :
 
 }
 
-int NrVolumeChangerMacImpl::setVolume(double percent)
+
+int NrVolumeChangerMacImpl::getDefaultInputDeviceId() const
 {
+    int devid = -1;
+    AudioObjectPropertyAddress propertyDefaultInput = {
+        kAudioHardwarePropertyDefaultInputDevice,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
 
-    Float32 outPropertyData = 0.0;
-    OSStatus ret;
+    //get DefaultAudioOutput Id
+    UInt32 defaultOutputDeviceIDSize = sizeof(UInt32), defaultOutputDeviceID;
+    OSStatus ret = AudioObjectGetPropertyData(
+                AudioObjectID(kAudioObjectSystemObject),
+                &propertyDefaultInput,
+                0,
+                nil,
+                &defaultOutputDeviceIDSize,
+                &defaultOutputDeviceID);
+    qDebug() << "getting default input device id" << ret << defaultOutputDeviceID;
+    devid = defaultOutputDeviceID;
+    return devid;
+}
 
+
+int NrVolumeChangerMacImpl::getDefaultOutputDeviceId() const
+{
+    int devid = -1;
     AudioObjectPropertyAddress propertyDefaultOutput = {
         kAudioHardwarePropertyDefaultOutputDevice,
         kAudioDevicePropertyScopeOutput,
@@ -29,16 +51,43 @@ int NrVolumeChangerMacImpl::setVolume(double percent)
 
     //get DefaultAudioOutput Id
     UInt32 defaultOutputDeviceIDSize = sizeof(UInt32), defaultOutputDeviceID;
-    ret = AudioObjectGetPropertyData(
+    OSStatus ret = AudioObjectGetPropertyData(
                 AudioObjectID(kAudioObjectSystemObject),
                 &propertyDefaultOutput,
                 0,
                 nil,
                 &defaultOutputDeviceIDSize,
                 &defaultOutputDeviceID);
-    qDebug() << ret << defaultOutputDeviceID;
+    qDebug() << "getting default output device id" << ret << defaultOutputDeviceID;
+    devid = defaultOutputDeviceID;
+    return devid;
+}
 
 
+int NrVolumeChangerMacImpl::setVolume(double percent)
+{
+
+    Float32 outPropertyData = 0.0;
+    OSStatus ret;
+
+//    AudioObjectPropertyAddress propertyDefaultOutput = {
+//        kAudioHardwarePropertyDefaultOutputDevice,
+//        kAudioDevicePropertyScopeOutput,
+//        kAudioObjectPropertyElementMaster
+//    };
+
+//    //get DefaultAudioOutput Id
+//    UInt32 defaultOutputDeviceIDSize = sizeof(UInt32), defaultOutputDeviceID;
+//    ret = AudioObjectGetPropertyData(
+//                AudioObjectID(kAudioObjectSystemObject),
+//                &propertyDefaultOutput,
+//                0,
+//                nil,
+//                &defaultOutputDeviceIDSize,
+//                &defaultOutputDeviceID);
+//    qDebug() << ret << defaultOutputDeviceID;
+
+    UInt32 defaultOutputDeviceID = getDefaultOutputDeviceId();
 
     AudioObjectPropertyAddress propertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
@@ -67,23 +116,24 @@ double NrVolumeChangerMacImpl::getVolume() const
     UInt32 outPropertyDataSize = sizeof(Float32);
     OSStatus ret;
 
-    AudioObjectPropertyAddress propertyDefaultOutput = {
-        kAudioHardwarePropertyDefaultOutputDevice,
-        kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
-    };
+//    AudioObjectPropertyAddress propertyDefaultOutput = {
+//        kAudioHardwarePropertyDefaultOutputDevice,
+//        kAudioDevicePropertyScopeOutput,
+//        kAudioObjectPropertyElementMaster
+//    };
 
-    //get DefaultAudioOutput Id
-    UInt32 defaultOutputDeviceIDSize = sizeof(UInt32), defaultOutputDeviceID;
-    ret = AudioObjectGetPropertyData(
-                AudioObjectID(kAudioObjectSystemObject),
-                &propertyDefaultOutput,
-                0,
-                nil,
-                &defaultOutputDeviceIDSize,
-                &defaultOutputDeviceID);
-    qDebug() << "output device id" << ret << defaultOutputDeviceID;
+//    //get DefaultAudioOutput Id
+//    UInt32 defaultOutputDeviceIDSize = sizeof(UInt32), defaultOutputDeviceID;
+//    ret = AudioObjectGetPropertyData(
+//                AudioObjectID(kAudioObjectSystemObject),
+//                &propertyDefaultOutput,
+//                0,
+//                nil,
+//                &defaultOutputDeviceIDSize,
+//                &defaultOutputDeviceID);
+//    qDebug() << "output device id" << ret << defaultOutputDeviceID;
 
+    UInt32 defaultOutputDeviceID = getDefaultOutputDeviceId();
 
 
     AudioObjectPropertyAddress propertyAddress = {

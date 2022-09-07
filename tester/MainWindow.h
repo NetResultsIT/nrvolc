@@ -24,5 +24,6 @@ private:
 private slots:
     void onTimeoutRead();
     void onNewVolumeSet();
+    void onNewVolumeSet_In();
 };
 #endif // MAINWINDOW_H

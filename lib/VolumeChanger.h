@@ -9,8 +9,10 @@ class NRVOLC_LIB_EXPORT NrVolumeChanger : public QObject
     Q_OBJECT
 public:
     NrVolumeChanger(QObject *parent=nullptr);
-    virtual int setVolume(double percent) = 0;
-    virtual double getVolume() const = 0;
+    virtual int setDefaultInputVolume(double percent) = 0;
+    virtual double getDefaultInputVolume() const = 0;
+    virtual int setDefaultOutputVolume(double percent) = 0;
+    virtual double getDefaultOutputVolume() const = 0;
 };
 
 #endif // LIB_H

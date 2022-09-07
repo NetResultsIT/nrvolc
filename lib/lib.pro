@@ -38,10 +38,11 @@ HEADERS += \
     VolumeChanger.h
 
 win32 {
+
     CONFIG(debug, debug|release): LIBSUFFIX=d
     PLATFORM = win32_vs2015
     WINEXT = dll lib exp pdb
-
+    LIBS += ole32.lib
     HEADERS += $$PWD/NrVolumeChangerWin.h
     SOURCES += $$PWD/NrVolumeChangerWin.cpp
 }

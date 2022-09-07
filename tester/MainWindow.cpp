@@ -55,6 +55,6 @@ void MainWindow::onTimeoutRead()
     qDebug() << "Current out volume:" << d;
     ui->txtOldVol->setText(QString::number(d));
     double d1 = m_pVolc->getDefaultInputVolume();
-    qDebug() << "Current in volume:" << d;
+    qDebug() << "Current in volume:" << d1;
     ui->txtOldVol_In->setText(QString::number(d1));
 }

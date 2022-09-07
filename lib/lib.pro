@@ -10,7 +10,10 @@ MINOR_RELEASE = $$member(VERSION_PARTS, 1)
 BUILD_RELEASE = $$member(VERSION_PARTS, 2)
 
 QT -= gui
-QT += macextras
+
+macx {
+    QT += macextras
+}
 
 TEMPLATE = lib
 DEFINES += NRVOLC_LIB_LIBRARY
@@ -34,17 +37,24 @@ HEADERS += \
     lib_global.h \
     VolumeChanger.h
 
+win32 {
+    CONFIG(debug, debug|release): LIBSUFFIX=d
+    PLATFORM = win32_vs2015
+    WINEXT = dll lib exp pdb
+
+    HEADERS += $$PWD/NrVolumeChangerWin.h
+    SOURCES += $$PWD/NrVolumeChangerWin.cpp
+}
+
 mac {
-    HEADERS += $PWD/NrVolumeChangerMac.h
+    HEADERS += $$PWD/NrVolumeChangerMac.h
     OBJECTIVE_HEADERS += $$PWD/cocoaHelper.h
     OBJECTIVE_SOURCES +=\
       $$PWD/cocoaHelper.mm \
       $$PWD/NrVolumeChangerMac.mm
     LIBS += -framework Foundation
-    #LIBS += -framework AppKit
     LIBS += -framework CoreFoundation
     LIBS += -framework CoreAudio
-    #LIBS += -framework IOKit
     LIBS += -framework AudioToolbox
 
     CONFIG(debug, debug|release): LIBSUFFIX=_debug
@@ -70,6 +80,7 @@ INCLUDE_HEADERS = \
     $$PWD/VolumeChanger.h \
     $$PWD/lib_global.h \
     $$PWD/NrVolumeChangerMac.h \
+    $$PWD/NrVolumeChangerWin.h \
 
 
 #### DEPLOY ####
@@ -123,7 +134,7 @@ win32 {
     for(vinc, INCLUDE_HEADERS):QMAKE_POST_LINK+="$$QMAKE_COPY $$replace(vinc,"/","\\") \"$$INCLUDE_DIR\" $$escape_expand(\\n\\t)"
 }
 
-message("NRVOLC  INCLUDEPATH: $$INCLUDEPATH")
+message("NRVOLC INCLUDEPATH: $$INCLUDEPATH")
 message("NRVOLC LIBS: $$LIBS")
 
 

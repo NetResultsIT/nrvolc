@@ -18,7 +18,20 @@ HEADERS += \
 FORMS += \
     MainWindow.ui
 
-LIBS += -L $$PWD/../lib/last_build -lnrvolc_debug
+macx {
+ CONFIG(debug, debug|release): LIBSUFFIX=_debug
+}
+
+win32 {
+    CONFIG(debug, debug|release): LIBSUFFIX=d
+}
+
+LIBS += -L$$PWD/../lib/last_build # -lnrvolc$$LIBSUFFIX
 INCLUDEPATH += $$PWD/../lib/last_build/include
 
+win32 {
+    LIBS += nrvolc$${LIBSUFFIX}.lib
+} else {
+    LIBS += -lnrvolc$$LIBSUFFIX
+}
 

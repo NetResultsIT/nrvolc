@@ -4,7 +4,12 @@
 #include <QDebug>
 #include <QTimer>
 
+#ifdef Q_OS_MACOS
 #include "NrVolumeChangerMac.h"
+#endif
+
+
+#include "NrVolumeChangerWin.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -12,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowTitle("Volume Changer");
-    m_pVolc = new NrVolumeChangerMacImpl();
+    m_pVolc = new NrVolumeChangerWinImpl();
     onTimeoutRead();
 
     QTimer *tim = new QTimer(this);

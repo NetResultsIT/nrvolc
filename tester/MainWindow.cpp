@@ -4,12 +4,18 @@
 #include <QDebug>
 #include <QTimer>
 
+//TODO allow a factory to return the correct pointer
 #ifdef Q_OS_MACOS
 #include "NrVolumeChangerMac.h"
 #endif
 
-
+#ifdef Q_OS_WIN
 #include "NrVolumeChangerWin.h"
+#endif
+
+#ifdef Q_OS_LINUX
+#include "NrVolumeChangerLinux.h"
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,7 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowTitle("Volume Changer");
+#ifdef Q_OS_MAC
+    m_pVolc = new NrVolumeChangerMacImpl();
+#elif defined( Q_OS_WIN )
     m_pVolc = new NrVolumeChangerWinImpl();
+#include "NrVolumeChangerWin.h"
+#elif defined( Q_OS_LINUX )
+    m_pVolc = new NrVolumeChangerLinuxImpl();
+#endif
     onTimeoutRead();
 
     QTimer *tim = new QTimer(this);

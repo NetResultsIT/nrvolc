@@ -38,13 +38,19 @@ HEADERS += \
     VolumeChanger.h
 
 win32 {
-
     CONFIG(debug, debug|release): LIBSUFFIX=d
     PLATFORM = win32_vs2015
     WINEXT = dll lib exp pdb
     LIBS += ole32.lib
     HEADERS += $$PWD/NrVolumeChangerWin.h
     SOURCES += $$PWD/NrVolumeChangerWin.cpp
+}
+
+linux {
+    CONFIG(debug, debug|release): LIBSUFFIX=_d
+
+    HEADERS += $$PWD/NrVolumeChangerLinux.h
+    SOURCES += $$PWD/NrVolumeChangerLinux.cpp
 }
 
 mac {
@@ -82,6 +88,7 @@ INCLUDE_HEADERS = \
     $$PWD/lib_global.h \
     $$PWD/NrVolumeChangerMac.h \
     $$PWD/NrVolumeChangerWin.h \
+    $$PWD/NrVolumeChangerLinux.h \
 
 
 #### DEPLOY ####

@@ -26,6 +26,10 @@ win32 {
     CONFIG(debug, debug|release): LIBSUFFIX=d
 }
 
+linux {
+    CONFIG(debug, debug|release): LIBSUFFIX=_d
+}
+
 LIBS += -L$$PWD/../lib/last_build # -lnrvolc$$LIBSUFFIX
 INCLUDEPATH += $$PWD/../lib/last_build/include
 

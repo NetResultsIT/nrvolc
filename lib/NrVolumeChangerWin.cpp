@@ -77,8 +77,6 @@ double NrVolumeChangerWinImpl::getDefaultInputVolume() const
     defaultDevice = NULL;
     // -------------------------
     float currentVolume = 0;
-    endpointVolume->GetMasterVolumeLevel(&currentVolume);
-    printf("Current volume in dB is: %f\n", currentVolume);
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     printf("Current volume as a scalar is: %f\n", currentVolume);
 
@@ -87,7 +85,6 @@ double NrVolumeChangerWinImpl::getDefaultInputVolume() const
 }
 double NrVolumeChangerWinImpl::getDefaultOutputVolume() const
 {
-
     // -------------------------
     HRESULT hr;
 
@@ -104,11 +101,8 @@ double NrVolumeChangerWinImpl::getDefaultOutputVolume() const
     defaultDevice = NULL;
     // -------------------------
     float currentVolume = 0;
-    endpointVolume->GetMasterVolumeLevel(&currentVolume);
-    printf("Current volume in dB is: %f\n", currentVolume);
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     printf("Current volume as a scalar is: %f\n", currentVolume);
-
 
     return currentVolume * 100;
 }

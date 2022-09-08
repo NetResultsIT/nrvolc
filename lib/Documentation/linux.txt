@@ -1,0 +1,6 @@
+Reference links
+
+https://stackoverflow.com/questions/6787318/set-alsa-master-volume-from-c-code
+https://stackoverflow.com/questions/19489343/set-alsa-master-volume-in-db-from-c-code
+https://stackoverflow.com/questions/6787318/set-alsa-master-volume-from-c-code/6787957#6787957
+https://stackoverflow.com/questions/7657624/get-master-sound-volume-in-c-in-linux

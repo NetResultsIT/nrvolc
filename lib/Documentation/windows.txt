@@ -1,0 +1,12 @@
+Reference Links:
+https://docs.microsoft.com/en-us/previous-versions//ms678736(v=vs.85)
+https://docs.microsoft.com/en-us/previous-versions//ms679138(v=vs.85)
+https://docs.microsoft.com/en-us/previous-versions//ms678707(v=vs.85)
+https://docs.microsoft.com/en-us/windows/win32/api/_coreaudio/
+https://docs.microsoft.com/en-us/previous-versions//aa964574(v=vs.85)?redirectedfrom=MSDN
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/volume-in-windows-vista-part-1-what-is-volume
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/fun-with-the-endpoint-volume-interfaces-closing-the-loop
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/fun-with-the-endpoint-volume-interfaces-lets-add-metering
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/other-fun-things-to-do-with-the-endpointvolume-interfaces
+https://docs.microsoft.com/en-us/archive/blogs/larryosterman/how-do-i-change-the-master-volume-in-windows-vista

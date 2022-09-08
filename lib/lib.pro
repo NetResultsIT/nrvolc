@@ -51,6 +51,8 @@ linux {
 
     HEADERS += $$PWD/NrVolumeChangerLinux.h
     SOURCES += $$PWD/NrVolumeChangerLinux.cpp
+
+LIBS += -lasound
 }
 
 mac {

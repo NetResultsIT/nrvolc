@@ -38,7 +38,6 @@ HEADERS += \
     VolumeChanger.h
 
 win32 {
-
     # compiler options to generate an external symbol file
     CONFIG(release, debug|release) {
         QMAKE_CXXFLAGS_RELEASE += /Zi
@@ -63,7 +62,7 @@ linux {
     HEADERS += $$PWD/NrVolumeChangerLinux.h
     SOURCES += $$PWD/NrVolumeChangerLinux.cpp
 
-LIBS += -lasound
+    LIBS += -lasound
 }
 
 mac {
@@ -99,9 +98,6 @@ DLLPATH = ""
 INCLUDE_HEADERS = \
     $$PWD/VolumeChanger.h \
     $$PWD/lib_global.h \
-    $$PWD/NrVolumeChangerMac.h \
-    $$PWD/NrVolumeChangerWin.h \
-    $$PWD/NrVolumeChangerLinux.h \
 
 
 #### DEPLOY ####
@@ -126,15 +122,15 @@ TARGET=$$join(TARGET,,,$${LIBSUFFIX})
 
 #we first get a full fledged dll filename (w/o dot extension)
 win32 {
-DLL = $$join(TARGET,,$${DLLPATH}/,)
+    DLL = $$join(TARGET,,$${DLLPATH}/,)
 } else {
-DLL = $$join(TARGET,,$${DLLPATH}/lib,)
+    DLL = $$join(TARGET,,$${DLLPATH}/lib,)
 }
 #then we add bin to the target to have it generated in the bin/ subfolder (compiler quirks...)
 TARGET = $$join(TARGET,,bin/,)
 #gcc compiler quirks
 !win32 {
-TARGET = $$join(TARGET,,$$BUILDTYPE/,)
+    TARGET = $$join(TARGET,,$$BUILDTYPE/,)
 }
 
 
@@ -144,6 +140,7 @@ unix {
     QMAKE_POST_LINK += "mkdir -p $$INCLUDE_DIR $$escape_expand(\\n\\t)"
     QMAKE_POST_LINK += "cp -aP $$INCLUDE_HEADERS $$INCLUDE_DIR $$escape_expand(\\n\\t)"
 }
+
 win32 {
     DLL = $$replace(DLL,"/","\\")
     DSTDIR = $$replace(DSTDIR,"/","\\")
@@ -157,5 +154,4 @@ win32 {
 
 message("NRVOLC INCLUDEPATH: $$INCLUDEPATH")
 message("NRVOLC LIBS: $$LIBS")
-
 

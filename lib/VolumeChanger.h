@@ -13,6 +13,7 @@ public:
     virtual double getDefaultInputVolume() const = 0;
     virtual int setDefaultOutputVolume(double percent) = 0;
     virtual double getDefaultOutputVolume() const = 0;
+    static NrVolumeChanger* getInstance();
 };
 
 #endif // LIB_H

@@ -38,6 +38,17 @@ HEADERS += \
     VolumeChanger.h
 
 win32 {
+
+    # compiler options to generate an external symbol file
+    CONFIG(release, debug|release) {
+        QMAKE_CXXFLAGS_RELEASE += /Zi
+        QMAKE_LFLAGS_RELEASE += /DEBUG
+        QMAKE_LFLAGS_RELEASE += /OPT:REF
+        QMAKE_LFLAGS_RELEASE += /OPT:ICF
+        #ignore (starting from vs2013) the missing pdb files for dependecy libs
+        QMAKE_LFLAGS_RELEASE += /ignore:4099
+    }
+
     CONFIG(debug, debug|release): LIBSUFFIX=d
     PLATFORM = win32_vs2015
     WINEXT = dll lib exp pdb

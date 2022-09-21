@@ -4,16 +4,16 @@
 #include <VolumeChanger.h>
 
 struct IMMDevice;
+struct IAudioEndpointVolume;
 
 class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
 {
     IMMDevice* getDefaultInputDeviceId() const;
     IMMDevice* getDefaultOutputDeviceId() const;
+    IAudioEndpointVolume* getDeviceEndpointVolume(IMMDevice *defaultDevice) const;
 
-    int setInputDeviceVolume(int devId, double percent);
-    double getInputDeviceVolume(int devId) const;
-    int setOutputDeviceVolume(int devId, double percent);
-    double getOutputDeviceVolume(int devId) const;
+    int setDeviceVolume(IMMDevice*, double percent);
+    double getDeviceVolume(IMMDevice* devId) const;
 public:
     NrVolumeChangerWinImpl(QObject *parent=nullptr);
     virtual int setDefaultInputVolume(double percent);

@@ -53,15 +53,24 @@ IMMDevice* NrVolumeChangerWinImpl::getDefaultOutputDeviceId() const
     return defaultDevice;
 }
 
+
+IAudioEndpointVolume* NrVolumeChangerWinImpl::getDeviceEndpointVolume(IMMDevice *defaultDevice) const
+{
+    HRESULT hr;
+    IAudioEndpointVolume *endpointVolume = NULL;
+    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
+    defaultDevice->Release();
+    defaultDevice = NULL;
+    return endpointVolume;
+}
+
+
 int NrVolumeChangerWinImpl::setDefaultInputVolume(double percent)
 {
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultInputDeviceId();
-    IAudioEndpointVolume *endpointVolume = NULL;
-    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
-    defaultDevice->Release();
-    defaultDevice = NULL;
+    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
 
@@ -74,10 +83,7 @@ int NrVolumeChangerWinImpl::setDefaultOutputVolume(double percent)
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultOutputDeviceId();
-    IAudioEndpointVolume *endpointVolume = NULL;
-    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
-    defaultDevice->Release();
-    defaultDevice = NULL;
+    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
 
@@ -92,14 +98,11 @@ double NrVolumeChangerWinImpl::getDefaultInputVolume() const
     HRESULT hr;
 
     IMMDevice *defaultDevice = getDefaultInputDeviceId();
-    IAudioEndpointVolume *endpointVolume = NULL;
-    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
-    defaultDevice->Release();
-    defaultDevice = NULL;
+    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     float currentVolume = 0;
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
-    printf("Current volume as a scalar is: %f\n", currentVolume);
+    //printf("Current volume as a scalar is: %f\n", currentVolume);
 
     return currentVolume * 100;
 }
@@ -110,14 +113,11 @@ double NrVolumeChangerWinImpl::getDefaultOutputVolume() const
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultOutputDeviceId();
-    IAudioEndpointVolume *endpointVolume = NULL;
-    hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
-    defaultDevice->Release();
-    defaultDevice = NULL;
+    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     float currentVolume = 0;
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
-    printf("Current volume as a scalar is: %f\n", currentVolume);
+    //printf("Current volume as a scalar is: %f\n", currentVolume);
 
     return currentVolume * 100;
 }

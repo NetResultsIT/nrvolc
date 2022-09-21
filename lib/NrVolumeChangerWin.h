@@ -3,12 +3,12 @@
 
 #include <VolumeChanger.h>
 
-class AudioObjectPropertyAddress;
+struct IMMDevice;
 
 class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
 {
-    int getDefaultInputDeviceId() const;
-    int getDefaultOutputDeviceId() const;
+    IMMDevice* getDefaultInputDeviceId() const;
+    IMMDevice* getDefaultOutputDeviceId() const;
 
     int setInputDeviceVolume(int devId, double percent);
     double getInputDeviceVolume(int devId) const;

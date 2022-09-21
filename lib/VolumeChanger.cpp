@@ -15,6 +15,7 @@
 NrVolumeChanger::NrVolumeChanger(QObject *p)
     : QObject(p)
 {
+    //empty ctor
 }
 
 NrVolumeChanger* NrVolumeChanger::getInstance()

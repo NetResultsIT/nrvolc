@@ -14,17 +14,50 @@ NrVolumeChangerWinImpl::NrVolumeChangerWinImpl(QObject *parent)
 
 }
 
-int NrVolumeChangerWinImpl::setDefaultInputVolume(double percent)
+
+IMMDevice* NrVolumeChangerWinImpl::getDefaultInputDeviceId() const
 {
-    // -------------------------
     HRESULT hr;
     CoInitialize(NULL);
     IMMDeviceEnumerator *deviceEnumerator = NULL;
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
+    if (hr != 0)
+        return nullptr;
+
     IMMDevice *defaultDevice = NULL;
     hr = deviceEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &defaultDevice);
     deviceEnumerator->Release();
     deviceEnumerator = NULL;
+    if (hr != 0)
+        return nullptr;
+
+    return defaultDevice;
+}
+
+IMMDevice* NrVolumeChangerWinImpl::getDefaultOutputDeviceId() const
+{
+    HRESULT hr;
+    CoInitialize(NULL);
+    IMMDeviceEnumerator *deviceEnumerator = NULL;
+    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
+    if (hr != 0)
+        return nullptr;
+
+    IMMDevice *defaultDevice = NULL;
+    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
+    deviceEnumerator->Release();
+    deviceEnumerator = NULL;
+    if (hr != 0)
+        return nullptr;
+
+    return defaultDevice;
+}
+
+int NrVolumeChangerWinImpl::setDefaultInputVolume(double percent)
+{
+    // -------------------------
+    HRESULT hr;
+    IMMDevice *defaultDevice = getDefaultInputDeviceId();
     IAudioEndpointVolume *endpointVolume = NULL;
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     defaultDevice->Release();
@@ -40,13 +73,7 @@ int NrVolumeChangerWinImpl::setDefaultOutputVolume(double percent)
 
     // -------------------------
     HRESULT hr;
-    CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
-    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
-    IMMDevice *defaultDevice = NULL;
-    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    IMMDevice *defaultDevice = getDefaultOutputDeviceId();
     IAudioEndpointVolume *endpointVolume = NULL;
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     defaultDevice->Release();
@@ -64,13 +91,7 @@ double NrVolumeChangerWinImpl::getDefaultInputVolume() const
     // -------------------------
     HRESULT hr;
 
-    CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
-    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
-    IMMDevice *defaultDevice = NULL;
-    hr = deviceEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &defaultDevice);
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    IMMDevice *defaultDevice = getDefaultInputDeviceId();
     IAudioEndpointVolume *endpointVolume = NULL;
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     defaultDevice->Release();
@@ -80,21 +101,15 @@ double NrVolumeChangerWinImpl::getDefaultInputVolume() const
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     printf("Current volume as a scalar is: %f\n", currentVolume);
 
-
     return currentVolume * 100;
 }
+
+
 double NrVolumeChangerWinImpl::getDefaultOutputVolume() const
 {
     // -------------------------
     HRESULT hr;
-
-    CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
-    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
-    IMMDevice *defaultDevice = NULL;
-    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    IMMDevice *defaultDevice = getDefaultOutputDeviceId();
     IAudioEndpointVolume *endpointVolume = NULL;
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
     defaultDevice->Release();

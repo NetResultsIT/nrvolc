@@ -13,6 +13,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     NrVolumeChanger *m_pVolc;
+    std::map<std::string, std::string> m_InputDeviceMap;
+    std::map<std::string, std::string> m_OutputDeviceMap;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -25,5 +27,9 @@ private slots:
     void onTimeoutRead();
     void onNewVolumeSet();
     void onNewVolumeSet_In();
+    void onCustomInputDeviceSelected(bool);
+    void onCustomOutputDeviceSelected(bool);
+    void onCustomInputDeviceChanged();
+    void onCustomOutputDeviceChanged();
 };
 #endif // MAINWINDOW_H

@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>451</width>
+      <width>641</width>
       <height>111</height>
      </rect>
     </property>
@@ -47,6 +47,9 @@
        <width>121</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="maximum">
+      <double>100.000000000000000</double>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
@@ -88,13 +91,55 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QRadioButton" name="rdoUseDefDevice">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>30</y>
+       <width>69</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Default</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rdoUseCustDevice">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>30</y>
+       <width>69</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Custom</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmdDeviceList">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>30</y>
+       <width>151</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="gboxInput">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>130</y>
-      <width>451</width>
+      <width>641</width>
       <height>111</height>
      </rect>
     </property>
@@ -122,6 +167,9 @@
        <width>121</width>
        <height>22</height>
       </rect>
+     </property>
+     <property name="maximum">
+      <double>100.000000000000000</double>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
@@ -163,6 +211,48 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QRadioButton" name="rdoUseDefDevice_In">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>30</y>
+       <width>69</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Default</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmdDeviceList_In">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>30</y>
+       <width>151</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rdoUseCustDevice_In">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>30</y>
+       <width>69</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Custom</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -171,7 +261,7 @@
      <x>0</x>
      <y>0</y>
      <width>662</width>
-     <height>24</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>

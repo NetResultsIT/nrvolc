@@ -1,7 +1,6 @@
 #ifndef NRVOLC_LIB_H
 #define NRVOLC_LIB_H
 
-#include "lib_global.h"
 #include <QObject>
 
 namespace NRVOLC {
@@ -11,6 +10,19 @@ namespace NRVOLC {
         ANY_DEVICE      = 2,
     };
 }
+
+
+#if !defined(WIN32) || defined(NRVOLC_STATIC)
+// define NRVOLC_LIB_EXPORT to be "nothing"
+#define NRVOLC_LIB_EXPORT
+#else
+ #ifdef NRVOLC_DLL
+   #define NRVOLC_LIB_EXPORT __declspec(dllexport)
+ #elif !defined(NRVOLC_STATIC)
+   #define NRVOLC_LIB_EXPORT __declspec(dllimport)
+ #endif
+#endif
+
 
 class NRVOLC_LIB_EXPORT NrVolumeChanger : public QObject
 {

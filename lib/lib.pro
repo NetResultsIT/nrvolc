@@ -16,15 +16,22 @@ macx {
 }
 
 TEMPLATE = lib
-DEFINES += NRVOLC_LIB_LIBRARY
-
 
 #set libversion on unix
 unix: VERSION=$$NRVOLC_VERSION
 
-CONFIG += c++11 staticlib
+CONFIG += c++11
 
 TARGET = nrvolc
+
+# Uncomment to compile nrvolc as staticlib
+# NOTE: it is not very convenient to compile as static lib
+#       since on windows we depend on ole32 that would have to be linked
+#       by app or dll linking statically to nrvolc
+# NOTE: You would also to define NRVOLC_STATIC in the linking project to avoid
+#       expansion of NRVOLC_LIB_EXPORTS to __declspec(dllimport)
+#CONFIG += staticlib
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -34,7 +41,6 @@ SOURCES += \
     VolumeChanger.cpp
 
 HEADERS += \
-    lib_global.h \
     VolumeChanger.h
 
 win32 {
@@ -53,9 +59,11 @@ win32 {
     WINEXT = lib pdb
     !contains(CONFIG, staticlib) {
         message("Building nrvolc as dynamic library")
+        DEFINES += NRVOLC_DLL
         WINEXT += dll exp
     } else {
         message("Building nrvolc as static library")
+        DEFINES += NRVOLC_STATIC
         #On windows staticlib release builds the pdb file is in the form vcXXX.pdb
         QMAKE_CXXFLAGS_RELEASE += /Fd$${OUT_PWD}/release/bin/$${TARGET}.pdb
     }
@@ -105,7 +113,6 @@ INCLUDE_DIR = $$DSTDIR/include
 DLLPATH = ""
 INCLUDE_HEADERS = \
     $$PWD/VolumeChanger.h \
-    $$PWD/lib_global.h \
 
 
 #### DEPLOY ####

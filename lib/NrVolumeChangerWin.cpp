@@ -1,9 +1,7 @@
 #include "NrVolumeChangerWin.h"
 
-#include <QDebug>
 
-
-#include <stdio.h>
+#include <iostream>
 #include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
@@ -74,7 +72,7 @@ IMMDeviceCollection* NrVolumeChangerWinImpl::listDevices(int i_flowtype) const
     IMMDeviceCollection *pCollection;
     hr = deviceEnumerator->EnumAudioEndpoints(edf, DEVICE_STATE_ACTIVE, &pCollection);
     if (hr != S_OK) {
-        qDebug() << "Error enumerating devices";
+        std::cerr << "Error enumerating devices" << std::endl;
     }
 //    uint count;
 //    IMMDevice *pEndpoint;
@@ -187,7 +185,7 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
         // Print endpoint friendly name and endpoint ID.
         QString devName = QString::fromWCharArray(varName.pwszVal);
         QString devUid = QString::fromWCharArray(pwszID);
-        qDebug() << "Endpoint " << i << devName << devUid;
+        std::cerr << "Endpoint " << i << devName.toStdString() << devUid.toStdString() << std::endl;
         map.insert({devName.toStdString(), devUid.toStdString()});
 
         CoTaskMemFree(pwszID);
@@ -214,7 +212,7 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const QString &uid) const
     IMMDeviceCollection *pCollection;
     hr = deviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &pCollection);
     if (hr != S_OK) {
-        qDebug() << "Error enumerating devices";
+        std::cerr << "Error enumerating devices" << std::endl;
     }
     uint count;
     IMMDevice *pEndpoint;

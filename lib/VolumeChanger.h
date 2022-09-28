@@ -6,9 +6,9 @@
 
 namespace NRVOLC {
     enum DeviceType {
-        INPUT_DEVICE = 0,
-        OUTPUT_DEVICE = 1,
-        ANY_DEVICE = 2,
+        INPUT_DEVICE    = 0,
+        OUTPUT_DEVICE   = 1,
+        ANY_DEVICE      = 2,
     };
 }
 

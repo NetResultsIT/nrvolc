@@ -22,7 +22,7 @@ DEFINES += NRVOLC_LIB_LIBRARY
 #set libversion on unix
 unix: VERSION=$$NRVOLC_VERSION
 
-CONFIG += c++11
+CONFIG += c++11 staticlib
 
 TARGET = nrvolc
 

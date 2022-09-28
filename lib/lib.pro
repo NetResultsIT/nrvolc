@@ -50,7 +50,13 @@ win32 {
 
     CONFIG(debug, debug|release): LIBSUFFIX=d
     PLATFORM = win32_vs2015
-    WINEXT = dll lib exp pdb
+    WINEXT = lib pdb
+    !contains(CONFIG, staticlib) {
+        message("Building nrvolc as dynamic library")
+        WINEXT += dll exp
+    } else {
+        message("Building nrvolc as static library")
+    }
     LIBS += ole32.lib
     HEADERS += $$PWD/NrVolumeChangerWin.h
     SOURCES += $$PWD/NrVolumeChangerWin.cpp

@@ -56,6 +56,8 @@ win32 {
         WINEXT += dll exp
     } else {
         message("Building nrvolc as static library")
+        #On windows staticlib release builds the pdb file is in the form vcXXX.pdb
+        QMAKE_CXXFLAGS_RELEASE += /Fd$${OUT_PWD}/release/bin/$${TARGET}.pdb
     }
     LIBS += ole32.lib
     HEADERS += $$PWD/NrVolumeChangerWin.h

@@ -1,5 +1,5 @@
 #include "NrVolumeChangerMac.h"
-#include "cocoaHelper.h"
+//#include "cocoaHelper.h"
 
 #import <AppKit/NSSound.h>
 #import <AudioToolbox/AudioServices.h>
@@ -201,17 +201,18 @@ typedef enum {
     kAudioTypeInput = 1,
     kAudioTypeOutput = 2,
     kAudioTypeSystemOutput = 3
-} ASDeviceType;
+} ASDeviceType_delete;
 
 typedef enum {
   kOutputFormatDefault = 0,
   kOutputFormatName = 1
-} ASOutputFormat;
+} ASOutputFormat_delete;
 
 constexpr int DEVICE_NAME_LEN = 26;
 
 
-void getDeviceName(AudioDeviceID deviceID, char *deviceName) {
+void getDeviceName(AudioDeviceID deviceID, char *deviceName)
+{
     UInt32 propertySize = 256;
     AudioObjectPropertyAddress pa;
     pa.mSelector = kAudioDevicePropertyDeviceName;
@@ -264,7 +265,7 @@ void getDeviceTransportType(AudioDeviceID deviceID, AudioDevicePropertyID *trans
     AudioObjectGetPropertyData(deviceID, &pa, 0, 0, &size, transportType);
 }
 
-char *deviceTypeName(ASDeviceType device_type) {
+char *deviceTypeName_delete(ASDeviceType_delete device_type) {
     switch (device_type) {
         case kAudioTypeInput:
             return "input";
@@ -277,10 +278,10 @@ char *deviceTypeName(ASDeviceType device_type) {
     }
 }
 
-void printProperties_delete(AudioDeviceID deviceID, ASDeviceType typeRequested, ASOutputFormat outputFormat) {
+void printProperties_delete(AudioDeviceID deviceID, ASDeviceType_delete typeRequested, ASOutputFormat_delete outputFormat) {
     char deviceName[DEVICE_NAME_LEN];
     float vol_left, vol_right;
-    ASDeviceType device_type;
+    ASDeviceType_delete device_type;
     UInt32 transportType;
 
     switch (typeRequested) {
@@ -312,7 +313,7 @@ void printProperties_delete(AudioDeviceID deviceID, ASDeviceType typeRequested, 
         break;
       default:
         printf("outputformat: default\n");
-        printf("[%3u] - %6s %-26s", (unsigned int) deviceID, deviceTypeName(device_type), deviceName);
+        printf("[%3u] - %6s %-26s", (unsigned int) deviceID, deviceTypeName_delete(device_type), deviceName);
         if (vol_left < -0.1 || vol_right < -0.1) {
           printf("\n");
         }
@@ -334,7 +335,8 @@ void printProperties_delete(AudioDeviceID deviceID, ASDeviceType typeRequested, 
 }
 
 
-bool isAnOutputDevice(AudioDeviceID deviceID) {
+bool isAnOutputDevice(AudioDeviceID deviceID)
+{
     UInt32 propertySize = 256;
 
     AudioObjectPropertyAddress pa;
@@ -349,7 +351,8 @@ bool isAnOutputDevice(AudioDeviceID deviceID) {
     return false;
 }
 
-bool isAnInputDevice(AudioDeviceID deviceID) {
+bool isAnInputDevice(AudioDeviceID deviceID)
+{
     UInt32 propertySize = 256;
 
     AudioObjectPropertyAddress pa;
@@ -368,33 +371,28 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 {
     std::map<std::string, std::string> list;
 
-    //void showAllDevices(ASDeviceType typeRequested, ASOutputFormat outputFormat) {
-        AudioDeviceID dev_array[64];
-        int numberOfDevices = 0;
+    AudioDeviceID dev_array[64];
+    int numberOfDevices = 0;
 
-        numberOfDevices = getNumberOfDevices(dev_array);
-        ASDeviceType typeRequested;
-        ASOutputFormat outputFormat = kOutputFormatDefault;
+    numberOfDevices = getNumberOfDevices(dev_array);
 
-        if (dt == NRVOLC::INPUT_DEVICE) {
-            typeRequested = kAudioTypeInput;
-            //outputFormat = kOutputFormatDefault;
-            printf("Getting input device\n");
-        } else {
-            typeRequested = kAudioTypeOutput;
-            //outputFormat = kOutputFormatDefault;
-            printf("Getting output device\n");
+    for (int i = 0; i < numberOfDevices; ++i) {
+        int did = dev_array[i];
+        printf("Getting properties of audio device %d\n", did);
+        //printProperties(dev_array[i], typeRequested, outputFormat);
+        if (dt == NRVOLC::INPUT_DEVICE && isAnInputDevice(did)) {
+            qDebug() << "input dev volume: " << getInputDeviceVolume(did);
+            char devname[256];
+            getDeviceName(did, devname);
+            list.insert({QString(devname).toStdString(), QString::number(did).toStdString()});
         }
-
-        for (int i = 0; i < numberOfDevices; ++i) {
-            printf("Getting properties of audio device %d\n", dev_array[i]);
-            //printProperties(dev_array[i], typeRequested, outputFormat);
-            if (typeRequested == kAudioTypeInput && isAnInputDevice(dev_array[i]))
-                qDebug() << "input dev volume: " << getInputDeviceVolume(dev_array[i]);
-            else if (typeRequested == kAudioTypeOutput&& isAnOutputDevice(dev_array[i]))
-                qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
+        else if (dt == NRVOLC::OUTPUT_DEVICE && isAnOutputDevice(did)) {
+            qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
+            char devname[256];
+            getDeviceName(did, devname);
+            list.insert({QString(devname).toStdString(), QString::number(did).toStdString()});
         }
-    //}
+    }
 
     return list;
 }
@@ -403,23 +401,23 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 
 double NrVolumeChangerMacImpl::getOutputDeviceVolume(std::string deviceUid) const
 {
-    return -1;
+    return getOutputDeviceVolume(QString::fromStdString(deviceUid).toInt());
 }
 
 
 double NrVolumeChangerMacImpl::getInputDeviceVolume(std::string deviceUid) const
 {
-    return -1;
+    return getInputDeviceVolume(QString::fromStdString(deviceUid).toInt());
 }
 
 
 int NrVolumeChangerMacImpl::setInputDeviceVolume(std::string deviceUid, double percent)
 {
-    return -1;
+    return setInputDeviceVolume(QString::fromStdString(deviceUid).toInt(), percent);
 }
 
 int NrVolumeChangerMacImpl::setOutputDeviceVolume(std::string deviceUid, double percent)
 {
-    return -1;
+    return setOutputDeviceVolume(QString::fromStdString(deviceUid).toInt(), percent);
 }
 

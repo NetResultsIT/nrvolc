@@ -1,7 +1,7 @@
 #ifndef NRVOLC_COCOA_WRAPPER_H
 #define NRVOLC_COCOA_WRAPPER_H
 
-#include <VolumeChanger.h>
+#include "VolumeChanger.h"
 
 class AudioObjectPropertyAddress;
 
@@ -23,6 +23,11 @@ public:
     virtual double getDefaultInputVolume() const;
     virtual int setDefaultOutputVolume(double percent);
     virtual double getDefaultOutputVolume() const;
+    virtual std::map<std::string, std::string> getDeviceList(NRVOLC::DeviceType=NRVOLC::ANY_DEVICE) const;
+    virtual double getOutputDeviceVolume(std::string deviceUid) const;
+    virtual double getInputDeviceVolume(std::string deviceUid) const;
+    virtual int setInputDeviceVolume(std::string deviceUid, double percent);
+    virtual int setOutputDeviceVolume(std::string deviceUid, double percent);
 };
 
 #endif

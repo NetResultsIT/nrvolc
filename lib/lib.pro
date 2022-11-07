@@ -83,9 +83,9 @@ linux {
 
 mac {
     HEADERS += $$PWD/NrVolumeChangerMac.h
-    OBJECTIVE_HEADERS += $$PWD/cocoaHelper.h
+#    OBJECTIVE_HEADERS += $$PWD/cocoaHelper.h
     OBJECTIVE_SOURCES +=\
-      $$PWD/cocoaHelper.mm \
+#      $$PWD/cocoaHelper.mm \
       $$PWD/NrVolumeChangerMac.mm
     LIBS += -framework Foundation
     LIBS += -framework CoreFoundation

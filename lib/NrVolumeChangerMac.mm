@@ -1,18 +1,16 @@
 #include "NrVolumeChangerMac.h"
-//#include "cocoaHelper.h"
 
 #import <AppKit/NSSound.h>
 #import <AudioToolbox/AudioServices.h>
 
-#include <QDebug>
-#include <QtMacExtras>
-
+//#include <QDebug>
+//#include <QtMacExtras>
 
 
 NrVolumeChangerMacImpl::NrVolumeChangerMacImpl(QObject *p) :
     NrVolumeChanger(p)
 {
-
+ // empty ctor
 }
 
 
@@ -34,7 +32,7 @@ int NrVolumeChangerMacImpl::getDefaultInputDeviceId() const
                 nil,
                 &defaultOutputDeviceIDSize,
                 &defaultOutputDeviceID);
-    qDebug() << "getting default input device id ("  << defaultOutputDeviceID << ") " << (ret == 0 ? "OK" : "KO");
+    //qDebug() << "getting default input device id ("  << defaultOutputDeviceID << ") " << (ret == 0 ? "OK" : "KO");
     devid = defaultOutputDeviceID;
     return devid;
 }
@@ -58,7 +56,7 @@ int NrVolumeChangerMacImpl::getDefaultOutputDeviceId() const
                 nil,
                 &defaultOutputDeviceIDSize,
                 &defaultOutputDeviceID);
-    qDebug() << "getting default output device id" << ret << defaultOutputDeviceID;
+    //qDebug() << "getting default output device id" << ret << defaultOutputDeviceID;
     devid = defaultOutputDeviceID;
     return devid;
 }
@@ -66,14 +64,12 @@ int NrVolumeChangerMacImpl::getDefaultOutputDeviceId() const
 
 int NrVolumeChangerMacImpl::setInputDeviceVolume(int devId, double percent)
 {
-    qDebug() << "Setting volume for input device" << devId << " at " << percent;
-
+    //qDebug() << "Setting volume for input device" << devId << " at " << percent;
     AudioObjectPropertyAddress propertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
         kAudioDevicePropertyScopeInput,
         kAudioObjectPropertyElementMaster
     };
-
 
     return setDeviceProperty(devId, &propertyAddress, percent);
 }
@@ -81,8 +77,7 @@ int NrVolumeChangerMacImpl::setInputDeviceVolume(int devId, double percent)
 
 int NrVolumeChangerMacImpl::setOutputDeviceVolume(int devId, double percent)
 {
-    qDebug() << "Setting volume for output device" << devId << " at " << percent;
-
+    //qDebug() << "Setting volume for output device" << devId << " at " << percent;//
     AudioObjectPropertyAddress propertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
         kAudioDevicePropertyScopeOutput,
@@ -105,15 +100,17 @@ int NrVolumeChangerMacImpl::setDeviceProperty(int devId, AudioObjectPropertyAddr
                                         sizeof(Float32),
                                         &outPropertyData);
 
-    qDebug() << "set device property result" << ret << outPropertyData;
+    //qDebug() << "set device property result" << ret << outPropertyData;
     return 0;
 }
+
 
 int NrVolumeChangerMacImpl::setDefaultInputVolume(double percent)
 {
     int devId = getDefaultInputDeviceId();
     return setInputDeviceVolume(devId, percent);
 }
+
 
 int NrVolumeChangerMacImpl::setDefaultOutputVolume(double percent)
 {
@@ -124,31 +121,29 @@ int NrVolumeChangerMacImpl::setDefaultOutputVolume(double percent)
 
 double NrVolumeChangerMacImpl::getInputDeviceVolume(int devId) const
 {
-    qDebug() << "getting volume of in device" << devId;
-
+    //qDebug() << "getting volume of in device" << devId;
     AudioObjectPropertyAddress propertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
         kAudioDevicePropertyScopeInput,
         kAudioObjectPropertyElementMaster
     };
 
-
     return getDeviceProperty(devId, &propertyAddress);
 }
 
+
 double NrVolumeChangerMacImpl::getOutputDeviceVolume(int devId) const
 {
-    qDebug() << "getting volume of out device" << devId;
-
+    //qDebug() << "getting volume of out device" << devId;
     AudioObjectPropertyAddress propertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
         kAudioDevicePropertyScopeOutput,
         kAudioObjectPropertyElementMaster
     };
 
-
     return getDeviceProperty(devId, &propertyAddress);
 }
+
 
 double NrVolumeChangerMacImpl::getDeviceProperty(int devId, AudioObjectPropertyAddress *propertyAddress) const
 {
@@ -162,7 +157,7 @@ double NrVolumeChangerMacImpl::getDeviceProperty(int devId, AudioObjectPropertyA
                                         &outPropertyDataSize,
                                         &outPropertyData);
 
-    qDebug() << "volume for device" << devId << outPropertyData << "result: " << ret;// << outPropertyDataSize;
+    //qDebug() << "volume for device" << devId << outPropertyData << "result: " << ret;// << outPropertyDataSize;
     return outPropertyData * 100;
 }
 
@@ -179,7 +174,13 @@ double NrVolumeChangerMacImpl::getDefaultInputVolume() const
 }
 
 
-UInt32 getNumberOfDevices(AudioDeviceID *dev_array)
+/*!
+ * \internal
+ * \brief getNumberOfDevices returns the number of audio devices and populates the passed array with the list of audio devices
+ * \param o_pDeviceArray (output variable) the pointer to a deviceArray that will be populated with the device list
+ * \return the number of devices present on the system
+ */
+UInt32 getNumberOfDevices(AudioDeviceID *o_pDeviceArray)
 {
     UInt32 propertySize;
     AudioObjectPropertyAddress pa;
@@ -189,26 +190,10 @@ UInt32 getNumberOfDevices(AudioDeviceID *dev_array)
 
     AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &pa, 0, NULL, &propertySize);
 
-    AudioObjectGetPropertyData(kAudioObjectSystemObject, &pa, 0, NULL, &propertySize, dev_array);
+    AudioObjectGetPropertyData(kAudioObjectSystemObject, &pa, 0, NULL, &propertySize, o_pDeviceArray);
 
     return (propertySize / sizeof(AudioDeviceID));
 }
-
-
-
-typedef enum {
-    kAudioTypeUnknown = 0,
-    kAudioTypeInput = 1,
-    kAudioTypeOutput = 2,
-    kAudioTypeSystemOutput = 3
-} ASDeviceType_delete;
-
-typedef enum {
-  kOutputFormatDefault = 0,
-  kOutputFormatName = 1
-} ASOutputFormat_delete;
-
-constexpr int DEVICE_NAME_LEN = 26;
 
 
 void getDeviceName(AudioDeviceID deviceID, char *deviceName)
@@ -222,118 +207,6 @@ void getDeviceName(AudioDeviceID deviceID, char *deviceName)
     AudioObjectGetPropertyData(deviceID, &pa, 0, NULL, &propertySize, deviceName);
 }
 
-void getDeviceVolume_delete(AudioDeviceID deviceID, float *vol_left, float *vol_right) {
-    OSStatus err;
-    UInt32 size;
-    UInt32 channel[2];
-
-    AudioObjectPropertyAddress pa;
-    pa.mSelector = kAudioDevicePropertyPreferredChannelsForStereo;
-    pa.mScope = kAudioDevicePropertyScopeOutput;
-    pa.mElement = kAudioObjectPropertyElementMaster;
-
-    size = sizeof(channel);
-    err = AudioObjectGetPropertyData(deviceID, &pa, 0, NULL, &size, &channel);
-    if (err != noErr) {
-        return;
-    }
-
-    *vol_right = -1.0;
-    *vol_left = -1.0;
-    pa.mSelector = kAudioDevicePropertyVolumeScalar;
-    size = sizeof(float);
-
-    pa.mElement = channel[0];
-    err = AudioObjectGetPropertyData(deviceID, &pa, 0, NULL, &size, vol_left);
-
-    pa.mElement = channel[1];
-    err |= AudioObjectGetPropertyData(deviceID, &pa, 0, NULL, &size, vol_right);
-
-    if (err != noErr) {
-        return;
-    }
-}
-
-void getDeviceTransportType(AudioDeviceID deviceID, AudioDevicePropertyID *transportType) {
-    AudioObjectPropertyAddress pa;
-    pa.mSelector = kAudioDevicePropertyTransportType;
-    pa.mScope = kAudioObjectPropertyScopeGlobal;
-    pa.mElement = kAudioObjectPropertyElementMaster;
-
-    UInt32 size = sizeof(transportType);
-
-    AudioObjectGetPropertyData(deviceID, &pa, 0, 0, &size, transportType);
-}
-
-char *deviceTypeName_delete(ASDeviceType_delete device_type) {
-    switch (device_type) {
-        case kAudioTypeInput:
-            return "input";
-        case kAudioTypeOutput:
-            return "output";
-        case kAudioTypeSystemOutput:
-            return "system";
-        default:
-            return "unknown";
-    }
-}
-
-void printProperties_delete(AudioDeviceID deviceID, ASDeviceType_delete typeRequested, ASOutputFormat_delete outputFormat) {
-    char deviceName[DEVICE_NAME_LEN];
-    float vol_left, vol_right;
-    ASDeviceType_delete device_type;
-    UInt32 transportType;
-
-    switch (typeRequested) {
-        case kAudioTypeInput:
-            //if (!isAnInputDevice(deviceID)) return;
-            device_type = kAudioTypeInput;
-            break;
-
-        case kAudioTypeOutput:
-            //if (!isAnOutputDevice(deviceID)) return;
-            device_type = kAudioTypeOutput;
-            break;
-
-        case kAudioTypeSystemOutput:
-            //device_type = getDeviceType(deviceID);
-            if (device_type != kAudioTypeOutput) return;
-            break;
-        default:
-            break;
-    }
-
-    getDeviceName(deviceID, deviceName);
-    //getDeviceVolume(deviceID, &vol_left, &vol_right);
-    getDeviceTransportType(deviceID, &transportType);
-
-    switch (outputFormat) {
-      case kOutputFormatName:
-        printf("%s\n", deviceName);
-        break;
-      default:
-        printf("outputformat: default\n");
-        printf("[%3u] - %6s %-26s", (unsigned int) deviceID, deviceTypeName_delete(device_type), deviceName);
-        if (vol_left < -0.1 || vol_right < -0.1) {
-          printf("\n");
-        }
-        else {
-          printf(" :: [%.3f:%.3f]\n", vol_left, vol_right);
-        }
-/*
-        if (transportType == kAudioDeviceTransportTypeAggregate) {
-          AudioObjectID sub_device[32];
-          UInt32 outSize = sizeof(sub_device);
-          getAggregateDeviceSubDeviceList(deviceID, sub_device, &outSize);
-          for (int j = 0; j < outSize / sizeof(AudioObjectID); j++) {
-            printf("\t");
-            printProperties(sub_device[j], device_type, outputFormat);
-          }
-        }*/
-    }
-
-}
-
 
 bool isAnOutputDevice(AudioDeviceID deviceID)
 {
@@ -344,7 +217,7 @@ bool isAnOutputDevice(AudioDeviceID deviceID)
     pa.mScope = kAudioDevicePropertyScopeOutput;
     pa.mElement = kAudioObjectPropertyElementMaster;
 
-    // if there are any output streams, then it is an output
+    // if there are any output streams, then it's an output
     AudioObjectGetPropertyDataSize(deviceID, &pa, 0, NULL, &propertySize);
     if (propertySize > 0) return true;
 
@@ -360,9 +233,9 @@ bool isAnInputDevice(AudioDeviceID deviceID)
     pa.mScope = kAudioDevicePropertyScopeInput;
     pa.mElement = kAudioObjectPropertyElementMaster;
 
-    // if there are any input streams, then it is an input
+    // if there are any input streams, then it's an input
     AudioObjectGetPropertyDataSize(deviceID, &pa, 0, NULL, &propertySize);
-    if (propertySize > 0) return kAudioTypeInput;
+    if (propertySize > 0) return true;
 
     return false;
 }
@@ -378,19 +251,17 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 
     for (int i = 0; i < numberOfDevices; ++i) {
         int did = dev_array[i];
-        printf("Getting properties of audio device %d\n", did);
+        //printf("Getting properties of audio device %d\n", did);
+        char devname[256];
+        getDeviceName(did, devname);
         //printProperties(dev_array[i], typeRequested, outputFormat);
         if (dt == NRVOLC::INPUT_DEVICE && isAnInputDevice(did)) {
-            qDebug() << "input dev volume: " << getInputDeviceVolume(did);
-            char devname[256];
-            getDeviceName(did, devname);
-            list.insert({QString(devname).toStdString(), QString::number(did).toStdString()});
+            //qDebug() << "input dev volume: " << getInputDeviceVolume(did);
+            list.insert({(devname), std::to_string(did)});
         }
         else if (dt == NRVOLC::OUTPUT_DEVICE && isAnOutputDevice(did)) {
-            qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
-            char devname[256];
-            getDeviceName(did, devname);
-            list.insert({QString(devname).toStdString(), QString::number(did).toStdString()});
+            //qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
+            list.insert({(devname), std::to_string(did)});
         }
     }
 
@@ -401,23 +272,23 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 
 double NrVolumeChangerMacImpl::getOutputDeviceVolume(std::string deviceUid) const
 {
-    return getOutputDeviceVolume(QString::fromStdString(deviceUid).toInt());
+    return getOutputDeviceVolume(stoi(deviceUid));
 }
 
 
 double NrVolumeChangerMacImpl::getInputDeviceVolume(std::string deviceUid) const
 {
-    return getInputDeviceVolume(QString::fromStdString(deviceUid).toInt());
+    return getInputDeviceVolume(stoi(deviceUid));
 }
 
 
 int NrVolumeChangerMacImpl::setInputDeviceVolume(std::string deviceUid, double percent)
 {
-    return setInputDeviceVolume(QString::fromStdString(deviceUid).toInt(), percent);
+    return setInputDeviceVolume(stoi(deviceUid), percent);
 }
 
 int NrVolumeChangerMacImpl::setOutputDeviceVolume(std::string deviceUid, double percent)
 {
-    return setOutputDeviceVolume(QString::fromStdString(deviceUid).toInt(), percent);
+    return setOutputDeviceVolume(stoi(deviceUid), percent);
 }
 

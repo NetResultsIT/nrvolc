@@ -24,6 +24,10 @@ namespace NRVOLC {
 #endif
 
 
+/*!
+ * \brief The NrVolumeChanger class is an abstact class that defines the interface that should be implemented to change volume
+ * on various platforms
+ */
 class NRVOLC_LIB_EXPORT NrVolumeChanger : public QObject
 {
     Q_OBJECT

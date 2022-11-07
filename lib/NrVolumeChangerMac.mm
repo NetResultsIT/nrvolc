@@ -240,6 +240,7 @@ bool isAnInputDevice(AudioDeviceID deviceID)
     return false;
 }
 
+
 std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC::DeviceType dt) const
 {
     std::map<std::string, std::string> list;
@@ -251,10 +252,10 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 
     for (int i = 0; i < numberOfDevices; ++i) {
         int did = dev_array[i];
-        //printf("Getting properties of audio device %d\n", did);
+
         char devname[256];
         getDeviceName(did, devname);
-        //printProperties(dev_array[i], typeRequested, outputFormat);
+
         if (dt == NRVOLC::INPUT_DEVICE && isAnInputDevice(did)) {
             //qDebug() << "input dev volume: " << getInputDeviceVolume(did);
             list.insert({(devname), std::to_string(did)});

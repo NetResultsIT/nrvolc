@@ -9,7 +9,7 @@ MAJOR_RELEASE = $$member(VERSION_PARTS, 0)
 MINOR_RELEASE = $$member(VERSION_PARTS, 1)
 BUILD_RELEASE = $$member(VERSION_PARTS, 2)
 
-QT -= gui
+QT -= gui core
 
 macx {
     QT += macextras

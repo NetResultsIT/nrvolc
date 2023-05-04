@@ -1,7 +1,9 @@
 #ifndef NRVOLC_LIB_H
 #define NRVOLC_LIB_H
 
-#include <QObject>
+//#include <QObject>
+#include <string>
+#include <map>
 
 namespace NRVOLC {
     enum DeviceType {
@@ -24,11 +26,11 @@ namespace NRVOLC {
 #endif
 
 
-class NRVOLC_LIB_EXPORT NrVolumeChanger : public QObject
+class NRVOLC_LIB_EXPORT NrVolumeChanger //: public QObject
 {
-    Q_OBJECT
+    //Q_OBJECT
 public:
-    NrVolumeChanger(QObject *parent=nullptr);
+    NrVolumeChanger();
     virtual int setDefaultInputVolume(double percent) = 0;
     virtual double getDefaultInputVolume() const = 0;
     virtual int setDefaultOutputVolume(double percent) = 0;

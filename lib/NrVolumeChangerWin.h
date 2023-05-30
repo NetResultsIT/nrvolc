@@ -11,8 +11,8 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
 {
     IMMDevice* getDefaultInputDevice() const;
     IMMDevice* getDefaultOutputDevice() const;
-    IMMDevice* getDeviceById(const QString&uid) const;
-    IMMDevice* getDeviceByName(const QString&uid) const;
+    IMMDevice* getDeviceById(const std::string& uid) const;
+    IMMDevice* getDeviceByName(const std::string& uid) const;
     IAudioEndpointVolume* getDeviceEndpointVolume(IMMDevice *defaultDevice) const;
     IMMDeviceCollection* listDevices(int) const;
 
@@ -20,7 +20,7 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
     double getDeviceVolume(IMMDevice* devId) const;
 
 public:
-    NrVolumeChangerWinImpl(QObject *parent=nullptr);
+    NrVolumeChangerWinImpl();
 
     int setDefaultInputVolume(double percent);
     double getDefaultInputVolume() const;

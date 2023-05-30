@@ -1,19 +1,19 @@
 #include "VolumeChanger.h"
 
-#ifdef Q_OS_MACOS
+#ifdef __APPLE__
 #include "NrVolumeChangerMac.h"
 #endif
 
-#ifdef Q_OS_WIN
+#ifdef WIN32
 #include "NrVolumeChangerWin.h"
 #endif
 
-#ifdef Q_OS_LINUX
+#if defined(__linux__) || defined(__linux)
 #include "NrVolumeChangerLinux.h"
 #endif
 
-NrVolumeChanger::NrVolumeChanger(QObject *p)
-    : QObject(p)
+NrVolumeChanger::NrVolumeChanger()
+    //: QObject(p)
 {
     //empty ctor
 }
@@ -24,11 +24,11 @@ NrVolumeChanger::NrVolumeChanger(QObject *p)
  */
 NrVolumeChanger* NrVolumeChanger::getInstance()
 {
-#ifdef Q_OS_MAC
+#ifdef __APPLE__
     return new NrVolumeChangerMacImpl();
-#elif defined( Q_OS_WIN )
+#elif defined( WIN32 )
     return new NrVolumeChangerWinImpl();
-#elif defined( Q_OS_LINUX )
+#elif defined(__linux__) || defined(__linux)
     return new NrVolumeChangerLinuxImpl();
 #endif
     return nullptr;

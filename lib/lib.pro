@@ -9,7 +9,7 @@ MAJOR_RELEASE = $$member(VERSION_PARTS, 0)
 MINOR_RELEASE = $$member(VERSION_PARTS, 1)
 BUILD_RELEASE = $$member(VERSION_PARTS, 2)
 
-QT -= gui
+QT -= gui core
 
 macx {
     QT += macextras
@@ -20,7 +20,7 @@ TEMPLATE = lib
 #set libversion on unix
 unix: VERSION=$$NRVOLC_VERSION
 
-CONFIG += c++11
+#CONFIG += c++11
 
 TARGET = nrvolc
 
@@ -55,7 +55,6 @@ win32 {
     }
 
     CONFIG(debug, debug|release): LIBSUFFIX=d
-    PLATFORM = win32_vs2015
     WINEXT = lib pdb
     !contains(CONFIG, staticlib) {
         message("Building nrvolc as dynamic library")

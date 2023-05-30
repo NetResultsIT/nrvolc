@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     onTimeoutRead();
 
     //only on windows we have the device list so far
-#ifndef WIN32
+#ifdef Q_OS_LINUX
     ui->rdoUseCustDevice->setEnabled(false);
     ui->rdoUseCustDevice_In->setEnabled(false);
 #endif

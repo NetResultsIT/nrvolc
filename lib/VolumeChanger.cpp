@@ -18,6 +18,10 @@ NrVolumeChanger::NrVolumeChanger()
     //empty ctor
 }
 
+/*!
+ * \brief NrVolumeChanger::getInstance is a factory method that creates an instance of NrVolumeChanges for the appropriate platform
+ * \return a pointer to the actual implementation on the correct platform. It might be nullptr if an error occurs.
+ */
 NrVolumeChanger* NrVolumeChanger::getInstance()
 {
 #ifdef __APPLE__

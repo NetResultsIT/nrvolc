@@ -18,8 +18,10 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
 
     int setDeviceVolume(IMMDevice*, double percent);
     double getDeviceVolume(IMMDevice* devId) const;
+
 public:
     NrVolumeChangerWinImpl();
+
     int setDefaultInputVolume(double percent);
     double getDefaultInputVolume() const;
     int setDefaultOutputVolume(double percent);

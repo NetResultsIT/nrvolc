@@ -26,7 +26,12 @@ namespace NRVOLC {
 #endif
 
 
-class NRVOLC_LIB_EXPORT NrVolumeChanger //: public QObject
+
+/*!
+ * \brief The NrVolumeChanger class is an abstact class that defines the interface that should be implemented to change volume
+ * on various platforms
+ */
+class NRVOLC_LIB_EXPORT NrVolumeChanger
 {
     //Q_OBJECT
 public:
@@ -36,7 +41,7 @@ public:
     virtual int setDefaultOutputVolume(double percent) = 0;
     virtual double getDefaultOutputVolume() const = 0;
     static NrVolumeChanger* getInstance();
-#ifdef WIN32
+#ifndef Q_OS_LINUX
     virtual std::map<std::string, std::string> getDeviceList(NRVOLC::DeviceType=NRVOLC::ANY_DEVICE) const = 0;
     virtual double getOutputDeviceVolume(std::string deviceUid) const = 0;
     virtual double getInputDeviceVolume(std::string deviceUid) const = 0;

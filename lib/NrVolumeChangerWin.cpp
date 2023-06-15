@@ -1,14 +1,34 @@
 #include "NrVolumeChangerWin.h"
 
-
+#include <stdint.h>
 #include <iostream>
+
 #include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 #include <Functiondiscoverykeys_devpkey.h>
 
-NrVolumeChangerWinImpl::NrVolumeChangerWinImpl(QObject *parent)
-    : NrVolumeChanger(parent)
+
+
+#include <locale>
+#include <codecvt>
+#include <string>
+
+std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> strconverter;
+
+std::string wstring_to_string(std::wstring wstr)
+{
+    return strconverter.to_bytes(wstr);
+}
+
+std::wstring string_to_wstring(std::string str)
+{
+    return strconverter.from_bytes(str);
+}
+
+
+NrVolumeChangerWinImpl::NrVolumeChangerWinImpl()
+    : NrVolumeChanger()
 {
 
 }
@@ -74,52 +94,6 @@ IMMDeviceCollection* NrVolumeChangerWinImpl::listDevices(int i_flowtype) const
     if (hr != S_OK) {
         std::cerr << "Error enumerating devices" << std::endl;
     }
-//    uint count;
-//    IMMDevice *pEndpoint;
-//    IPropertyStore *pProps = NULL;
-//    LPWSTR pwszID = NULL;
-//    hr = pCollection->GetCount(&count);
-//        //EXIT_ON_ERROR(hr)
-
-//    if (count == 0)
-//    {
-//        qDebug("No endpoints found.\n");
-//    }
-
-//    // Each loop prints the name of an endpoint device.
-//    for (ULONG i = 0; i < count; i++)
-//    {
-//        // Get pointer to endpoint number i.
-//        hr = pCollection->Item(i, &pEndpoint);
-//        //EXIT_ON_ERROR(hr)
-
-//        // Get the endpoint ID string.
-//        hr = pEndpoint->GetId(&pwszID);
-//        //EXIT_ON_ERROR(hr)
-
-//        hr = pEndpoint->OpenPropertyStore(
-//                          STGM_READ, &pProps);
-//        //EXIT_ON_ERROR(hr)
-
-//        PROPVARIANT varName;
-//        // Initialize container for property value.
-//        PropVariantInit(&varName);
-
-//        // Get the endpoint's friendly-name property.
-//        hr = pProps->GetValue(
-//                       PKEY_Device_FriendlyName, &varName);
-//        //EXIT_ON_ERROR(hr)
-
-//        // Print endpoint friendly name and endpoint ID.
-//        qDebug() << "Endpoint " <<
-//               i << QString::fromWCharArray(varName.pwszVal) << QString::fromWCharArray(pwszID);
-
-//        CoTaskMemFree(pwszID);
-//        pwszID = NULL;
-//        PropVariantClear(&varName);
-//        SAFE_RELEASE(pProps)
-//        SAFE_RELEASE(pEndpoint)
-//    }
 
     deviceEnumerator->Release();
     deviceEnumerator = NULL;
@@ -146,7 +120,7 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
 
     IMMDeviceCollection *pCollection = listDevices((int)edf);
 
-    uint count;
+    UINT count;
     IMMDevice *pEndpoint;
     IPropertyStore *pProps = NULL;
     LPWSTR pwszID = NULL;
@@ -155,7 +129,7 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
 
     if (count == 0)
     {
-        qDebug("No endpoints found.\n");
+        //qDebug("No endpoints found.\n");
     }
 
     // Each loop prints the name of an endpoint device.
@@ -183,10 +157,12 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
         //EXIT_ON_ERROR(hr)
 
         // Print endpoint friendly name and endpoint ID.
-        QString devName = QString::fromWCharArray(varName.pwszVal);
-        QString devUid = QString::fromWCharArray(pwszID);
-        std::cerr << "Endpoint " << i << devName.toStdString() << devUid.toStdString() << std::endl;
-        map.insert({devName.toStdString(), devUid.toStdString()});
+        std::wstring devName = varName.pwszVal;
+        std::wstring devUid = pwszID;
+        std::cerr << "Endpoint " << i << devName.c_str() << devUid.c_str() << std::endl;
+        std::string narrowDevName = wstring_to_string(devName);
+        std::string narrowDevUid = wstring_to_string(devUid);
+        map.insert({narrowDevName, narrowDevUid});
 
         CoTaskMemFree(pwszID);
         pwszID = NULL;
@@ -200,7 +176,7 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
 }
 
 
-IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const QString &uid) const
+IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const std::string &uid) const
 {
     HRESULT hr;
     CoInitialize(NULL);
@@ -214,7 +190,8 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const QString &uid) const
     if (hr != S_OK) {
         std::cerr << "Error enumerating devices" << std::endl;
     }
-    uint count;
+
+    UINT count;
     IMMDevice *pEndpoint;
     IMMDevice *pDevice = nullptr;
     LPWSTR pwszID = NULL;
@@ -223,7 +200,7 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const QString &uid) const
 
     if (count == 0)
     {
-        qDebug("No endpoints found.\n");
+        std::cerr << "No endpoints found.\n";
     }
 
     // Each loop prints the name of an endpoint device.
@@ -237,14 +214,16 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const QString &uid) const
         hr = pEndpoint->GetId(&pwszID);
         //EXIT_ON_ERROR(hr)
 
-        QString devUid = QString::fromWCharArray(pwszID);
+        std::wstring devUid(pwszID);
         CoTaskMemFree(pwszID);
         pwszID = NULL;
 
         // Print endpoint friendly name and endpoint ID.
         //qDebug() << "Endpoint " << devUid;
 
-        if (devUid == uid) {
+        //convert the string to wstring for comparison
+        std::wstring wideStrUid = string_to_wstring(uid);
+        if (devUid == wideStrUid) {
             //qDebug() << "We found the device we were looking for";
             pDevice = pEndpoint;
         } else {
@@ -298,7 +277,13 @@ int NrVolumeChangerWinImpl::setInputDeviceVolume(std::string deviceUid, double p
 {
     // -------------------------
     HRESULT hr;
-    IMMDevice *defaultDevice = getDeviceById(QString::fromStdString(deviceUid));
+    IMMDevice *defaultDevice = getDeviceById(deviceUid);
+
+    if (defaultDevice == nullptr) {
+        //device not found
+        return -1;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
@@ -351,7 +336,7 @@ double NrVolumeChangerWinImpl::getOutputDeviceVolume(std::string devUid) const
 {
     // -------------------------
     HRESULT hr;
-    IMMDevice *defaultDevice = getDeviceById(QString::fromStdString(devUid));
+    IMMDevice *defaultDevice = getDeviceById(devUid);
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     float currentVolume = 0;

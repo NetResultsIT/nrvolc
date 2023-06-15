@@ -7,8 +7,8 @@
 //#include <QtMacExtras>
 
 
-NrVolumeChangerMacImpl::NrVolumeChangerMacImpl(QObject *p) :
-    NrVolumeChanger(p)
+NrVolumeChangerMacImpl::NrVolumeChangerMacImpl() :
+    NrVolumeChanger()
 {
  // empty ctor
 }
@@ -208,6 +208,45 @@ void getDeviceName(AudioDeviceID deviceID, char *deviceName)
 }
 
 
+std::string getDeviceUid(AudioDeviceID deviceID)
+{
+  std::string devUid;
+    UInt32 propertySize = 256;
+    AudioObjectPropertyAddress pa;
+    pa.mSelector = kAudioDevicePropertyDeviceUID;
+    pa.mScope = kAudioObjectPropertyScopeGlobal;
+    pa.mElement = kAudioObjectPropertyElementMaster;
+
+    CFStringRef deviceUIDString;
+    //UInt32 propSize = sizeof(deviceUIDString);
+    AudioObjectGetPropertyData(
+            deviceID,
+            &pa,
+            0,
+            NULL,
+            &propertySize,
+            &deviceUIDString);
+
+
+    CFIndex deviceUIDLength = CFStringGetLength(deviceUIDString) + 1;
+    char *ASCIIDeviceUID = (char*) malloc(deviceUIDLength);
+    if ( !ASCIIDeviceUID )
+        return devUid;
+
+    if (CFStringGetCString (
+            deviceUIDString,
+            ASCIIDeviceUID,
+            deviceUIDLength,
+            kCFStringEncodingASCII))
+    {
+        devUid = ASCIIDeviceUID;
+    }
+
+    //AudioObjectGetPropertyData(deviceID2, &pa, 0, NULL, &propertySize, deviceUid);
+    return devUid;
+}
+
+
 bool isAnOutputDevice(AudioDeviceID deviceID)
 {
     UInt32 propertySize = 256;
@@ -241,6 +280,7 @@ bool isAnInputDevice(AudioDeviceID deviceID)
 }
 
 
+
 std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC::DeviceType dt) const
 {
     std::map<std::string, std::string> list;
@@ -255,14 +295,17 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 
         char devname[256];
         getDeviceName(did, devname);
+        std::string devUid = getDeviceUid(did);
 
         if (dt == NRVOLC::INPUT_DEVICE && isAnInputDevice(did)) {
             //qDebug() << "input dev volume: " << getInputDeviceVolume(did);
-            list.insert({(devname), std::to_string(did)});
+            list.insert({(devname), devUid});
         }
         else if (dt == NRVOLC::OUTPUT_DEVICE && isAnOutputDevice(did)) {
             //qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
-            list.insert({(devname), std::to_string(did)});
+            list.insert({(devname), devUid});
+        } else if (dt == NRVOLC::ANY_DEVICE) {
+            list.insert({(devname), devUid});
         }
     }
 
@@ -270,26 +313,68 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
 }
 
 
+std::map<std::string, std::string> getDeviceList2(NRVOLC::DeviceType dt)
+{
+    std::map<std::string, std::string> list;
+
+    AudioDeviceID dev_array[64];
+    int numberOfDevices = 0;
+
+    numberOfDevices = getNumberOfDevices(dev_array);
+
+    for (int i = 0; i < numberOfDevices; ++i) {
+        int did = dev_array[i];
+
+        std::string devUid = getDeviceUid(did);
+
+        if (dt == NRVOLC::INPUT_DEVICE && isAnInputDevice(did)) {
+            //qDebug() << "input dev volume: " << getInputDeviceVolume(did);
+            list.insert({(devUid), std::to_string(did)});
+        }
+        else if (dt == NRVOLC::OUTPUT_DEVICE && isAnOutputDevice(did)) {
+            //qDebug() << "output dev volume: " << getOutputDeviceVolume(dev_array[i]);
+            list.insert({(devUid), std::to_string(did)});
+        } else if (dt == NRVOLC::ANY_DEVICE) {
+            list.insert({(devUid), std::to_string(did)});
+        }
+    }
+
+    return list;
+}
+
+
+AudioDeviceID NrVolumeChangerMacImpl::getDeviceID(std::string devuid) const
+{
+    std::map<std::string, std::string> list = getDeviceList2(NRVOLC::ANY_DEVICE);
+    std::string uid = list.at(devuid);
+    int did = std::stoi(uid);
+    return (AudioDeviceID)did;
+}
+
 
 double NrVolumeChangerMacImpl::getOutputDeviceVolume(std::string deviceUid) const
 {
-    return getOutputDeviceVolume(stoi(deviceUid));
+    AudioDeviceID adid = getDeviceID(deviceUid);
+    return getOutputDeviceVolume(adid);
 }
 
 
 double NrVolumeChangerMacImpl::getInputDeviceVolume(std::string deviceUid) const
 {
-    return getInputDeviceVolume(stoi(deviceUid));
+    AudioDeviceID adid = getDeviceID(deviceUid);
+    return getInputDeviceVolume(adid);
 }
 
 
 int NrVolumeChangerMacImpl::setInputDeviceVolume(std::string deviceUid, double percent)
 {
-    return setInputDeviceVolume(stoi(deviceUid), percent);
+    AudioDeviceID devid = getDeviceID(deviceUid);
+    return setInputDeviceVolume(devid, percent);
 }
 
 int NrVolumeChangerMacImpl::setOutputDeviceVolume(std::string deviceUid, double percent)
 {
-    return setOutputDeviceVolume(stoi(deviceUid), percent);
+    AudioDeviceID devid = getDeviceID(deviceUid);
+    return setOutputDeviceVolume(devid, percent);
 }
 

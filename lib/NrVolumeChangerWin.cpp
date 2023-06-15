@@ -278,6 +278,12 @@ int NrVolumeChangerWinImpl::setInputDeviceVolume(std::string deviceUid, double p
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDeviceById(deviceUid);
+
+    if (defaultDevice == nullptr) {
+        //device not found
+        return -1;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
     // -------------------------
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);

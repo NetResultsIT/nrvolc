@@ -12,7 +12,9 @@ BUILD_RELEASE = $$member(VERSION_PARTS, 2)
 QT -= gui core
 
 macx {
-    QT += macextras
+    lessThan(QT_MAJOR_VERSION, 6) {
+        QT += macextras
+    }
 }
 
 TEMPLATE = lib
@@ -100,6 +102,11 @@ mac {
     } else {
         VER_MAJ=$$MAJOR_RELEASE
         QMAKE_POST_LINK += "install_name_tool -id @rpath/libnrvolc_debug.$${VER_MAJ}.dylib debug/bin/libnrvolc_debug.dylib $$escape_expand(\\n\\t)"
+    }
+
+    greaterThan(QT_MAJOR_VERSION, 5) {
+        message("Compiling KPE on macOS Qt6 x86_64 only")
+        QMAKE_APPLE_DEVICE_ARCHS="x86_64"
     }
 }
 

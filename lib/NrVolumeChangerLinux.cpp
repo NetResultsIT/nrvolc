@@ -9,7 +9,7 @@ NrVolumeChangerLinuxImpl::NrVolumeChangerLinuxImpl(QObject *parent)
 
 }
 
-int NrVolumeChangerLinuxImpl::setDefaultInputVolume(double percent)
+NrVolcErrorType NrVolumeChangerLinuxImpl::setDefaultInputVolume(double percent)
 {
 
     long min, max;
@@ -32,17 +32,16 @@ int NrVolumeChangerLinuxImpl::setDefaultInputVolume(double percent)
     snd_mixer_selem_set_capture_volume_all(elem, percent * max / 100);
 
     snd_mixer_close(handle);
-    return 0;
+    return NRVOLC_NO_ERROR;
 }
 
-int NrVolumeChangerLinuxImpl::setDefaultOutputVolume(double percent)
+NrVolcErrorType NrVolumeChangerLinuxImpl::setDefaultOutputVolume(double percent)
 {
-
     char **hints;
     /* Enumerate sound devices */
     int err = snd_device_name_hint(-1, "pcm", (void***)&hints);
     if (err != 0)
-       return -1;//Error! Just return
+       return NRVOLC_ERROR;//Error! Just return
 
     char** n = hints;
     while (*n != NULL) {
@@ -82,15 +81,13 @@ int NrVolumeChangerLinuxImpl::setDefaultOutputVolume(double percent)
 
     snd_mixer_close(handle);
 
-    return 0;
+    return NRVOLC_NO_ERROR;
 }
 
 
 
-double NrVolumeChangerLinuxImpl::getDefaultInputVolume() const
+NrVolcErrorType NrVolumeChangerLinuxImpl::getDefaultInputVolume(double &volume) const
 {
-
-
     long min, max;
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
@@ -112,10 +109,11 @@ double NrVolumeChangerLinuxImpl::getDefaultInputVolume() const
 
     qDebug() << "read value from alsa mixer input:" << max;
     snd_mixer_close(handle);
-    return max;
+    volume = max;
+    return NRVOLC_NO_ERROR;
 }
 
-double NrVolumeChangerLinuxImpl::getDefaultOutputVolume() const
+NrVolcErrorType NrVolumeChangerLinuxImpl::getDefaultOutputVolume(double &volume) const
 {
     long min, max, vol = 0;
     snd_mixer_t *handle;

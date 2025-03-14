@@ -1,5 +1,5 @@
 
-NRVOLC_VERSION=0.0.4
+NRVOLC_VERSION=0.0.5
 
 
 # --- DO NOT CHANGE BELOW THIS LINE ----
@@ -43,6 +43,7 @@ SOURCES += \
     VolumeChanger.cpp
 
 HEADERS += \
+    NrVolcErrors.h \
     VolumeChanger.h
 
 win32 {
@@ -119,6 +120,7 @@ INCLUDE_DIR = $$DSTDIR/include
 DLLPATH = ""
 INCLUDE_HEADERS = \
     $$PWD/VolumeChanger.h \
+    $$PWD/NrVolcErrors.h
 
 
 #### DEPLOY ####

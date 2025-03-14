@@ -22,16 +22,17 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerWinImpl : public NrVolumeChanger
 public:
     NrVolumeChangerWinImpl();
 
-    int setDefaultInputVolume(double percent);
-    double getDefaultInputVolume() const;
-    int setDefaultOutputVolume(double percent);
-    double getDefaultOutputVolume() const;
+    NrVolcErrorType setDefaultInputVolume(double percent) override;
+    NrVolcErrorType getDefaultInputVolume(double &volume) const override;
+    NrVolcErrorType setDefaultOutputVolume(double percent) override;
+    NrVolcErrorType getDefaultOutputVolume(double &volume) const override;
 
-    std::map<std::string, std::string> getDeviceList(NRVOLC::DeviceType devicetype=NRVOLC::ANY_DEVICE) const;
-    double getInputDeviceVolume(std::string) const;
-    double getOutputDeviceVolume(std::string) const;
-    int setInputDeviceVolume(std::string deviceUid, double percent);
-    int setOutputDeviceVolume(std::string deviceUid, double percent);
+    NrVolcErrorType getDeviceList(std::map<std::string, std::string> &devices,
+                                  NRVOLC::DeviceType devicetype=NRVOLC::ANY_DEVICE) const override;
+    NrVolcErrorType setInputDeviceVolume(const std::string &deviceUid, double percent) override;
+    NrVolcErrorType getInputDeviceVolume(const std::string &devUid, double &volume) const override;
+    NrVolcErrorType setOutputDeviceVolume(const std::string &deviceUid, double percent) override;
+    NrVolcErrorType getOutputDeviceVolume(const std::string &devUid, double &volume) const override;
 };
 
 #endif

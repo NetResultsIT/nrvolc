@@ -4,6 +4,7 @@
 //#include <QObject>
 #include <string>
 #include <map>
+#include "NrVolcErrors.h"
 
 namespace NRVOLC {
     enum DeviceType {
@@ -36,17 +37,18 @@ class NRVOLC_LIB_EXPORT NrVolumeChanger
     //Q_OBJECT
 public:
     NrVolumeChanger();
-    virtual int setDefaultInputVolume(double percent) = 0;
-    virtual double getDefaultInputVolume() const = 0;
-    virtual int setDefaultOutputVolume(double percent) = 0;
-    virtual double getDefaultOutputVolume() const = 0;
+    virtual NrVolcErrorType setDefaultInputVolume(double percent) = 0;
+    virtual NrVolcErrorType getDefaultInputVolume(double &volume) const = 0;
+    virtual NrVolcErrorType setDefaultOutputVolume(double percent) = 0;
+    virtual NrVolcErrorType getDefaultOutputVolume(double &volume) const = 0;
     static NrVolumeChanger* getInstance();
 #ifndef Q_OS_LINUX
-    virtual std::map<std::string, std::string> getDeviceList(NRVOLC::DeviceType=NRVOLC::ANY_DEVICE) const = 0;
-    virtual double getOutputDeviceVolume(std::string deviceUid) const = 0;
-    virtual double getInputDeviceVolume(std::string deviceUid) const = 0;
-    virtual int setInputDeviceVolume(std::string deviceUid, double percent) = 0;
-    virtual int setOutputDeviceVolume(std::string deviceUid, double percent) = 0;
+    virtual NrVolcErrorType getDeviceList(std::map<std::string, std::string> &devices,
+                                          NRVOLC::DeviceType=NRVOLC::ANY_DEVICE) const = 0;
+    virtual NrVolcErrorType setInputDeviceVolume(const std::string &deviceUid, double percent) = 0;
+    virtual NrVolcErrorType getInputDeviceVolume(const std::string &deviceUid, double &volume) const = 0;
+    virtual NrVolcErrorType setOutputDeviceVolume(const std::string &deviceUid, double percent) = 0;
+    virtual NrVolcErrorType getOutputDeviceVolume(const std::string &deviceUid, double &volume) const = 0;
 #endif
 };
 

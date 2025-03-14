@@ -8,13 +8,17 @@
 #include <endpointvolume.h>
 #include <Functiondiscoverykeys_devpkey.h>
 
-
-
 #include <locale>
 #include <codecvt>
 #include <string>
 
 std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> strconverter;
+
+#define SAFE_RELEASE(punk)  \
+do{ \
+        if ((punk) != nullptr)  \
+    { (punk)->Release(); (punk) = nullptr; } \
+}while(false)
 
 std::string wstring_to_string(std::wstring wstr)
 {
@@ -37,40 +41,34 @@ IMMDevice* NrVolumeChangerWinImpl::getDefaultInputDevice() const
 {
     HRESULT hr;
     CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
+    IMMDeviceEnumerator *deviceEnumerator = nullptr;
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
-    IMMDevice *defaultDevice = NULL;
+    IMMDevice *defaultDevice = nullptr;
     hr = deviceEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &defaultDevice);
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    SAFE_RELEASE(deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
     return defaultDevice;
 }
 
-#define SAFE_RELEASE(punk)  \
-              if ((punk) != NULL)  \
-                { (punk)->Release(); (punk) = NULL; }
-
 
 IMMDevice* NrVolumeChangerWinImpl::getDefaultOutputDevice() const
 {
     HRESULT hr;
     CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
+    IMMDeviceEnumerator *deviceEnumerator = nullptr;
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
-    IMMDevice *defaultDevice = NULL;
+    IMMDevice *defaultDevice = nullptr;
     hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDevice);
 
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    SAFE_RELEASE(deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
@@ -82,26 +80,26 @@ IMMDeviceCollection* NrVolumeChangerWinImpl::listDevices(int i_flowtype) const
 {
     HRESULT hr;
     CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
+    IMMDeviceEnumerator *deviceEnumerator = nullptr;
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
     EDataFlow edf = (EDataFlow)i_flowtype;
 
-    IMMDeviceCollection *pCollection;
+    IMMDeviceCollection *pCollection = nullptr;
     hr = deviceEnumerator->EnumAudioEndpoints(edf, DEVICE_STATE_ACTIVE, &pCollection);
     if (hr != S_OK) {
         std::cerr << "Error enumerating devices" << std::endl;
     }
 
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    SAFE_RELEASE(deviceEnumerator);
     return pCollection;
 }
 
 
-std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC::DeviceType devicetype) const
+NrVolcErrorType NrVolumeChangerWinImpl::getDeviceList(std::map<std::string, std::string> &devices,
+                                                      NRVOLC::DeviceType devicetype) const
 {
     std::map<std::string, std::string> map;
     HRESULT hr;
@@ -120,10 +118,15 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
 
     IMMDeviceCollection *pCollection = listDevices((int)edf);
 
+    if (pCollection == nullptr) {
+        //No device found
+        return NRVOLC_ERROR;
+    }
+
     UINT count;
     IMMDevice *pEndpoint;
-    IPropertyStore *pProps = NULL;
-    LPWSTR pwszID = NULL;
+    IPropertyStore *pProps = nullptr;
+    LPWSTR pwszID = nullptr;
     hr = pCollection->GetCount(&count);
         //EXIT_ON_ERROR(hr)
 
@@ -137,15 +140,25 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
     {
         // Get pointer to endpoint number i.
         hr = pCollection->Item(i, &pEndpoint);
-        //EXIT_ON_ERROR(hr)
+        if (hr != S_OK) {
+            SAFE_RELEASE(pEndpoint);
+            continue;
+        }
 
         // Get the endpoint ID string.
         hr = pEndpoint->GetId(&pwszID);
-        //EXIT_ON_ERROR(hr)
+        if (hr != S_OK) {
+            SAFE_RELEASE(pEndpoint);
+            continue;
+        }
 
         hr = pEndpoint->OpenPropertyStore(
                           STGM_READ, &pProps);
-        //EXIT_ON_ERROR(hr)
+        if (hr != S_OK) {
+            SAFE_RELEASE(pEndpoint);
+            SAFE_RELEASE(pProps);
+            continue;
+        }
 
         PROPVARIANT varName;
         // Initialize container for property value.
@@ -154,7 +167,11 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
         // Get the endpoint's friendly-name property.
         hr = pProps->GetValue(
                        PKEY_Device_FriendlyName, &varName);
-        //EXIT_ON_ERROR(hr)
+        if (hr != S_OK) {
+            SAFE_RELEASE(pEndpoint);
+            SAFE_RELEASE(pProps);
+            continue;
+        }
 
         // Print endpoint friendly name and endpoint ID.
         std::wstring devName = varName.pwszVal;
@@ -167,12 +184,13 @@ std::map<std::string, std::string> NrVolumeChangerWinImpl::getDeviceList(NRVOLC:
         CoTaskMemFree(pwszID);
         pwszID = NULL;
         PropVariantClear(&varName);
-        SAFE_RELEASE(pProps)
-        SAFE_RELEASE(pEndpoint)
+        SAFE_RELEASE(pProps);
+        SAFE_RELEASE(pEndpoint);
     }
     SAFE_RELEASE(pCollection);
 
-    return map;
+    devices = map;
+    return NRVOLC_NO_ERROR;
 }
 
 
@@ -180,21 +198,22 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const std::string &uid) const
 {
     HRESULT hr;
     CoInitialize(NULL);
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
+    IMMDeviceEnumerator *deviceEnumerator = nullptr;
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID *)&deviceEnumerator);
     if (hr != 0)
         return nullptr;
 
-    IMMDeviceCollection *pCollection;
+    IMMDeviceCollection *pCollection = nullptr;
     hr = deviceEnumerator->EnumAudioEndpoints(eAll, DEVICE_STATE_ACTIVE, &pCollection);
     if (hr != S_OK) {
         std::cerr << "Error enumerating devices" << std::endl;
+        return nullptr;
     }
 
     UINT count;
     IMMDevice *pEndpoint;
     IMMDevice *pDevice = nullptr;
-    LPWSTR pwszID = NULL;
+    LPWSTR pwszID = nullptr;
     hr = pCollection->GetCount(&count);
         //EXIT_ON_ERROR(hr)
 
@@ -216,7 +235,7 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const std::string &uid) const
 
         std::wstring devUid(pwszID);
         CoTaskMemFree(pwszID);
-        pwszID = NULL;
+        pwszID = nullptr;
 
         // Print endpoint friendly name and endpoint ID.
         //qDebug() << "Endpoint " << devUid;
@@ -227,53 +246,90 @@ IMMDevice* NrVolumeChangerWinImpl::getDeviceById(const std::string &uid) const
             //qDebug() << "We found the device we were looking for";
             pDevice = pEndpoint;
         } else {
-            SAFE_RELEASE(pEndpoint)
+            SAFE_RELEASE(pEndpoint);
         }
     }
 
-    deviceEnumerator->Release();
-    deviceEnumerator = NULL;
+    SAFE_RELEASE(deviceEnumerator);
     return pDevice;
 }
 
 IAudioEndpointVolume* NrVolumeChangerWinImpl::getDeviceEndpointVolume(IMMDevice *defaultDevice) const
 {
+    if (defaultDevice == nullptr) {
+        return nullptr;
+    }
+
     HRESULT hr;
-    IAudioEndpointVolume *endpointVolume = NULL;
+    IAudioEndpointVolume *endpointVolume = nullptr;
     hr = defaultDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_INPROC_SERVER, NULL, (LPVOID *)&endpointVolume);
-    defaultDevice->Release();
-    defaultDevice = NULL;
     return endpointVolume;
 }
 
 
-int NrVolumeChangerWinImpl::setDefaultInputVolume(double percent)
+NrVolcErrorType NrVolumeChangerWinImpl::setDefaultInputVolume(double percent)
 {
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultInputDevice();
-    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
-    // -------------------------
-    hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
 
-    return 0;
+    if (defaultDevice == nullptr) {
+        //TODO: (trasformare errore in enumerato con codici di errore)
+        return NRVOLC_ERROR;
+    }
+
+    IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
+    // -------------------------
+
+    if (endpointVolume == nullptr) {
+        //TODO: (trasformare errore in enumerato con codici di errore)
+        return NRVOLC_ERROR;
+    }
+
+    hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
+    SAFE_RELEASE(endpointVolume);
+
+    if (hr != S_OK) {
+        return NRVOLC_ERROR;
+    }
+
+    return NRVOLC_NO_ERROR;
 }
 
-int NrVolumeChangerWinImpl::setDefaultOutputVolume(double percent)
+NrVolcErrorType NrVolumeChangerWinImpl::setDefaultOutputVolume(double percent)
 {
 
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultOutputDevice();
+
+    if (defaultDevice == nullptr) {
+        return NRVOLC_ERROR;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
     // -------------------------
+
+    if (endpointVolume == nullptr) {
+        return NRVOLC_ERROR;
+    }
+
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
 
-    return 0;
+    //Releasing object no more useful
+    SAFE_RELEASE(endpointVolume);
+
+    if (hr != S_OK) {
+        return NRVOLC_ERROR;
+    }
+
+    return NRVOLC_NO_ERROR;
 }
 
 
-int NrVolumeChangerWinImpl::setInputDeviceVolume(std::string deviceUid, double percent)
+NrVolcErrorType NrVolumeChangerWinImpl::setInputDeviceVolume(const std::string &deviceUid, double percent)
 {
     // -------------------------
     HRESULT hr;
@@ -281,69 +337,132 @@ int NrVolumeChangerWinImpl::setInputDeviceVolume(std::string deviceUid, double p
 
     if (defaultDevice == nullptr) {
         //device not found
-        return -1;
+        return NRVOLC_ERROR;
     }
 
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
+
+    if (endpointVolume == nullptr)
+    {
+        return NRVOLC_ERROR;
+    }
     // -------------------------
+
     hr = endpointVolume->SetMasterVolumeLevelScalar((float)percent/100, NULL);
 
-    return 0;
+    //Releasing object no more useful
+    SAFE_RELEASE(endpointVolume);
+    return NRVOLC_NO_ERROR;
 }
 
-int NrVolumeChangerWinImpl::setOutputDeviceVolume(std::string deviceUid, double percent)
+NrVolcErrorType NrVolumeChangerWinImpl::setOutputDeviceVolume(const std::string &deviceUid, double percent)
 {
     return setInputDeviceVolume(deviceUid, percent);
 }
 
-double NrVolumeChangerWinImpl::getDefaultInputVolume() const
+NrVolcErrorType NrVolumeChangerWinImpl::getDefaultInputVolume(double &volume) const
 {
     // -------------------------
     HRESULT hr;
 
     IMMDevice *defaultDevice = getDefaultInputDevice();
+
+    if (defaultDevice == nullptr) {
+        //device not found
+        return NRVOLC_ERROR;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
     // -------------------------
+
+    if (endpointVolume == nullptr) {
+        return NRVOLC_ERROR;
+    }
     float currentVolume = 0;
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     //printf("Current volume as a scalar is: %f\n", currentVolume);
 
-    return currentVolume * 100;
+    //Releasing object no more useful
+    SAFE_RELEASE(endpointVolume);
+    if (hr != S_OK) {
+        return NRVOLC_ERROR;
+    }
+    volume = currentVolume * 100;
+    return NRVOLC_NO_ERROR;
 }
 
 
-double NrVolumeChangerWinImpl::getDefaultOutputVolume() const
+NrVolcErrorType NrVolumeChangerWinImpl::getDefaultOutputVolume(double &volume) const
 {
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDefaultOutputDevice();
+
+    if (defaultDevice == nullptr) {
+        //device not found
+        return NRVOLC_ERROR;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
     // -------------------------
+
+    if (endpointVolume == nullptr)
+    {
+        return NRVOLC_ERROR;
+    }
+
     float currentVolume = 0;
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     //printf("Current volume as a scalar is: %f\n", currentVolume);
 
-    return currentVolume * 100;
+    //Releasing object no more useful
+    SAFE_RELEASE(endpointVolume);
+
+    if (hr != S_OK) {
+        return NRVOLC_ERROR;
+    }
+
+    volume = currentVolume * 100;
+    return NRVOLC_NO_ERROR;
 }
 
 
-double NrVolumeChangerWinImpl::getInputDeviceVolume(std::string devUid) const
+NrVolcErrorType NrVolumeChangerWinImpl::getInputDeviceVolume(const std::string &devUid, double &volume) const
 {
-    return getOutputDeviceVolume(devUid);
+    return getOutputDeviceVolume(devUid, volume);
 }
 
-double NrVolumeChangerWinImpl::getOutputDeviceVolume(std::string devUid) const
+NrVolcErrorType NrVolumeChangerWinImpl::getOutputDeviceVolume(const std::string &devUid, double &volume) const
 {
     // -------------------------
     HRESULT hr;
     IMMDevice *defaultDevice = getDeviceById(devUid);
+
+    if (defaultDevice == nullptr) {
+        //device not found
+        return NRVOLC_ERROR;
+    }
+
     IAudioEndpointVolume *endpointVolume = getDeviceEndpointVolume(defaultDevice);
+    SAFE_RELEASE(defaultDevice);
     // -------------------------
+
+    if (endpointVolume == nullptr)
+    {
+        return NRVOLC_ERROR;
+    }
+
     float currentVolume = 0;
     hr = endpointVolume->GetMasterVolumeLevelScalar(&currentVolume);
     //printf("Current volume as a scalar is: %f\n", currentVolume);
 
-    return currentVolume * 100;
+    //Releasing object no more useful
+    SAFE_RELEASE(endpointVolume);
+    volume = currentVolume * 100;
+    return NRVOLC_NO_ERROR;
 }
 
 

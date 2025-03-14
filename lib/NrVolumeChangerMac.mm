@@ -62,7 +62,7 @@ int NrVolumeChangerMacImpl::getDefaultOutputDeviceId() const
 }
 
 
-int NrVolumeChangerMacImpl::setInputDeviceVolume(int devId, double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setInputDeviceVolume(int devId, double percent)
 {
     //qDebug() << "Setting volume for input device" << devId << " at " << percent;
     AudioObjectPropertyAddress propertyAddress = {
@@ -75,7 +75,7 @@ int NrVolumeChangerMacImpl::setInputDeviceVolume(int devId, double percent)
 }
 
 
-int NrVolumeChangerMacImpl::setOutputDeviceVolume(int devId, double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setOutputDeviceVolume(int devId, double percent)
 {
     //qDebug() << "Setting volume for output device" << devId << " at " << percent;//
     AudioObjectPropertyAddress propertyAddress = {
@@ -88,7 +88,7 @@ int NrVolumeChangerMacImpl::setOutputDeviceVolume(int devId, double percent)
 }
 
 
-int NrVolumeChangerMacImpl::setDeviceProperty(int devId, AudioObjectPropertyAddress *propertyAddress, double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setDeviceProperty(int devId, AudioObjectPropertyAddress *propertyAddress, double percent)
 {
     UInt32 defaultOutputDeviceID = devId;
     //Set DefaultAudioOutput volume
@@ -101,18 +101,18 @@ int NrVolumeChangerMacImpl::setDeviceProperty(int devId, AudioObjectPropertyAddr
                                         &outPropertyData);
 
     //qDebug() << "set device property result" << ret << outPropertyData;
-    return 0;
+    return NRVOLC_NO_ERROR;
 }
 
 
-int NrVolumeChangerMacImpl::setDefaultInputVolume(double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setDefaultInputVolume(double percent)
 {
     int devId = getDefaultInputDeviceId();
     return setInputDeviceVolume(devId, percent);
 }
 
 
-int NrVolumeChangerMacImpl::setDefaultOutputVolume(double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setDefaultOutputVolume(double percent)
 {
     int devId = getDefaultOutputDeviceId();
     return setOutputDeviceVolume(devId, percent);
@@ -161,16 +161,18 @@ double NrVolumeChangerMacImpl::getDeviceProperty(int devId, AudioObjectPropertyA
     return outPropertyData * 100;
 }
 
-double NrVolumeChangerMacImpl::getDefaultOutputVolume() const
+NrVolcErrorType NrVolumeChangerMacImpl::getDefaultOutputVolume(double &volume) const
 {
     int devid = getDefaultOutputDeviceId();
-    return getOutputDeviceVolume(devid);
+    volume = getOutputDeviceVolume(devid);
+    return NRVOLC_NO_ERROR;
 }
 
-double NrVolumeChangerMacImpl::getDefaultInputVolume() const
+NrVolcErrorType NrVolumeChangerMacImpl::getDefaultInputVolume(double &volume) const
 {
     int devid = getDefaultInputDeviceId();
-    return getInputDeviceVolume(devid);
+    volume = getInputDeviceVolume(devid);
+    return NRVOLC_NO_ERROR;
 }
 
 
@@ -281,7 +283,8 @@ bool isAnInputDevice(AudioDeviceID deviceID)
 
 
 
-std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC::DeviceType dt) const
+NrVolcErrorType NrVolumeChangerMacImpl::getDeviceList(std::map<std::string, std::string> &devices,
+                                                      NRVOLC::DeviceType dt) const
 {
     std::map<std::string, std::string> list;
 
@@ -309,7 +312,8 @@ std::map<std::string, std::string> NrVolumeChangerMacImpl::getDeviceList(NRVOLC:
         }
     }
 
-    return list;
+    devices = list;
+    return NRVOLC_NO_ERROR;
 }
 
 
@@ -343,7 +347,7 @@ std::map<std::string, std::string> getDeviceList2(NRVOLC::DeviceType dt)
 }
 
 
-AudioDeviceID NrVolumeChangerMacImpl::getDeviceID(std::string devuid) const
+AudioDeviceID NrVolumeChangerMacImpl::getDeviceID(const std::string &devuid) const
 {
     std::map<std::string, std::string> list = getDeviceList2(NRVOLC::ANY_DEVICE);
     std::string uid = list.at(devuid);
@@ -352,27 +356,29 @@ AudioDeviceID NrVolumeChangerMacImpl::getDeviceID(std::string devuid) const
 }
 
 
-double NrVolumeChangerMacImpl::getOutputDeviceVolume(std::string deviceUid) const
+NrVolcErrorType NrVolumeChangerMacImpl::getOutputDeviceVolume(const std::string &deviceUid, double &volume) const
 {
     AudioDeviceID adid = getDeviceID(deviceUid);
-    return getOutputDeviceVolume(adid);
+    volume = getOutputDeviceVolume(adid);
+    return NRVOLC_NO_ERROR;
 }
 
 
-double NrVolumeChangerMacImpl::getInputDeviceVolume(std::string deviceUid) const
+NrVolcErrorType NrVolumeChangerMacImpl::getInputDeviceVolume(const std::string &deviceUid, double &volume) const
 {
     AudioDeviceID adid = getDeviceID(deviceUid);
-    return getInputDeviceVolume(adid);
+    volume = getInputDeviceVolume(adid);
+    return NRVOLC_NO_ERROR;
 }
 
 
-int NrVolumeChangerMacImpl::setInputDeviceVolume(std::string deviceUid, double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setInputDeviceVolume(const std::string &deviceUid, double percent)
 {
     AudioDeviceID devid = getDeviceID(deviceUid);
     return setInputDeviceVolume(devid, percent);
 }
 
-int NrVolumeChangerMacImpl::setOutputDeviceVolume(std::string deviceUid, double percent)
+NrVolcErrorType NrVolumeChangerMacImpl::setOutputDeviceVolume(const std::string &deviceUid, double percent)
 {
     AudioDeviceID devid = getDeviceID(deviceUid);
     return setOutputDeviceVolume(devid, percent);

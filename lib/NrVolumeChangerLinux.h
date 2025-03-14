@@ -10,16 +10,16 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerLinuxImpl : public NrVolumeChanger
     int getDefaultInputDeviceId() const;
     int getDefaultOutputDeviceId() const;
 
-    int setInputDeviceVolume(int devId, double percent);
-    double getInputDeviceVolume(int devId) const;
-    int setOutputDeviceVolume(int devId, double percent);
-    double getOutputDeviceVolume(int devId) const;
+    NrVolcErrorType setInputDeviceVolume(int devId, double percent);
+    NrVolcErrorType getInputDeviceVolume(int devId, double &volume) const;
+    NrVolcErrorType setOutputDeviceVolume(int devId, double percent);
+    NrVolcErrorType getOutputDeviceVolume(int devId, double &volume) const;
 public:
     NrVolumeChangerLinuxImpl(QObject *parent=nullptr);
-    virtual int setDefaultInputVolume(double percent);
-    virtual double getDefaultInputVolume() const;
-    virtual int setDefaultOutputVolume(double percent);
-    virtual double getDefaultOutputVolume() const;
+    virtual NrVolcErrorType setDefaultInputVolume(double percent) override;
+    virtual NrVolcErrorType getDefaultInputVolume(double &volume) const override;
+    virtual NrVolcErrorType setDefaultOutputVolume(double percent) override;
+    virtual NrVolcErrorType getDefaultOutputVolume(double &volume) const override;
 };
 
 #endif

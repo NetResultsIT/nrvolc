@@ -32,13 +32,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tim, &QTimer::timeout, this, &MainWindow::onTimeoutRead);
     tim->start(4000);
 
-    m_OutputDeviceMap = m_pVolc->getDeviceList(NRVOLC::OUTPUT_DEVICE);
+    int err = m_pVolc->getDeviceList(m_OutputDeviceMap, NRVOLC::OUTPUT_DEVICE);
     for (auto const& x : m_OutputDeviceMap)
     {
         ui->cmdDeviceList->addItem(QString::fromStdString(x.first));
     }
 
-    m_InputDeviceMap = m_pVolc->getDeviceList(NRVOLC::INPUT_DEVICE);
+    err = m_pVolc->getDeviceList(m_InputDeviceMap, NRVOLC::INPUT_DEVICE);
     for (auto const& x : m_InputDeviceMap)
     {
         ui->cmdDeviceList_In->addItem(QString::fromStdString(x.first));
@@ -81,14 +81,15 @@ void MainWindow::onNewVolumeSet_In()
 
 void MainWindow::onTimeoutRead()
 {
+    int ret;
     double d;
     if (ui->rdoUseDefDevice->isChecked()) {
         qDebug() << "Reading default out device volume";
-        d = m_pVolc->getDefaultOutputVolume();
+        ret = m_pVolc->getDefaultOutputVolume(d);
     } else {
         qDebug() << "Reading volume of out device " << ui->cmdDeviceList->currentIndex();
         std::string devUid = m_OutputDeviceMap.at(ui->cmdDeviceList->currentText().toStdString());
-        d = m_pVolc->getOutputDeviceVolume(devUid);
+        ret = m_pVolc->getOutputDeviceVolume(devUid, d);
     }
     qDebug() << "Current out volume:" << d;
     ui->txtOldVol->setText(QString::number(d));
@@ -96,11 +97,11 @@ void MainWindow::onTimeoutRead()
     double d1;
     if (ui->rdoUseDefDevice_In->isChecked()) {
         qDebug() << "Reading default in device volume";
-        d1 = m_pVolc->getDefaultInputVolume();
+        ret = m_pVolc->getDefaultInputVolume(d1);
     } else {
         qDebug() << "Reading volume of in device " << ui->cmdDeviceList_In->currentIndex();
         std::string devUid = m_InputDeviceMap.at(ui->cmdDeviceList_In->currentText().toStdString());
-        d1 = m_pVolc->getInputDeviceVolume(devUid);
+        ret = m_pVolc->getInputDeviceVolume(devUid, d1);
     }
     qDebug() << "Current in volume:" << d1;
     ui->txtOldVol_In->setText(QString::number(d1));

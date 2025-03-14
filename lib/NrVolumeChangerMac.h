@@ -2,10 +2,8 @@
 #define NRVOLC_COCOA_WRAPPER_H
 
 #include "CoreAudio/AudioHardware.h"
-//#include "CoreAudio/AudioHardwareDeprecated.h"
 #include "VolumeChanger.h"
 
-//class AudioObjectPropertyAddress;
 
 class NRVOLC_LIB_EXPORT NrVolumeChangerMacImpl : public NrVolumeChanger
 {
@@ -18,8 +16,9 @@ class NRVOLC_LIB_EXPORT NrVolumeChangerMacImpl : public NrVolumeChanger
     double getOutputDeviceVolume(int devId) const;
     AudioDeviceID getDeviceID(const std::string &uid) const;
     //TODO make these two templated
-    int setDeviceProperty(int devId, AudioObjectPropertyAddress *propAddr, double propValue);
+    NrVolcErrorType setDeviceProperty(int devId, AudioObjectPropertyAddress *propAddr, double propValue);
     double getDeviceProperty(int devId, AudioObjectPropertyAddress *propAddr) const;
+
 public:
     NrVolumeChangerMacImpl();
     virtual NrVolcErrorType setDefaultInputVolume(double percent) override;

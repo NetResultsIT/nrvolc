@@ -3,9 +3,6 @@
 #import <AppKit/NSSound.h>
 #import <AudioToolbox/AudioServices.h>
 
-//#include <QDebug>
-//#include <QtMacExtras>
-
 
 NrVolumeChangerMacImpl::NrVolumeChangerMacImpl() :
     NrVolumeChanger()

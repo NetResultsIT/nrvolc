@@ -238,7 +238,7 @@ NrVolcErrorType getDevices(AudioDeviceID **pDeviceArray, UInt32 &deviceCount)
 
     *pDeviceArray = static_cast<AudioDeviceID*>(malloc(propertySize));
 
-    status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &pa, 0, NULL, &propertySize, &pDeviceArray);
+    status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &pa, 0, NULL, &propertySize, *pDeviceArray);
 
     if (status != kAudioHardwareNoError) {
       free(*pDeviceArray);

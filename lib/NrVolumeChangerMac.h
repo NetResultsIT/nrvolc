@@ -7,17 +7,16 @@
 
 class NRVOLC_LIB_EXPORT NrVolumeChangerMacImpl : public NrVolumeChanger
 {
-    int getDefaultInputDeviceId() const;
-    int getDefaultOutputDeviceId() const;
+    NrVolcErrorType getDefaultInputDeviceId(int &devId) const;
+    NrVolcErrorType getDefaultOutputDeviceId(int &devId) const;
 
     NrVolcErrorType setInputDeviceVolume(int devId, double percent);
-    double getInputDeviceVolume(int devId) const;
+    NrVolcErrorType getInputDeviceVolume(int devId, double &volume) const;
     NrVolcErrorType setOutputDeviceVolume(int devId, double percent);
-    double getOutputDeviceVolume(int devId) const;
-    AudioDeviceID getDeviceID(const std::string &uid) const;
-    //TODO make these two templated
-    NrVolcErrorType setDeviceProperty(int devId, AudioObjectPropertyAddress *propAddr, double propValue);
-    double getDeviceProperty(int devId, AudioObjectPropertyAddress *propAddr) const;
+    NrVolcErrorType getOutputDeviceVolume(int devId, double &volume) const;
+    NrVolcErrorType getDeviceID(const std::string &uid, AudioDeviceID &devId) const;
+    NrVolcErrorType setDeviceVolume(int devId, AudioObjectPropertyAddress *propAddr, double propValue);
+    NrVolcErrorType getDeviceVolume(int devId, AudioObjectPropertyAddress *propAddr, double &volume) const;
 
 public:
     NrVolumeChangerMacImpl();

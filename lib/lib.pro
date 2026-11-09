@@ -1,5 +1,5 @@
 
-NRVOLC_VERSION=0.1.1
+NRVOLC_VERSION=0.2.0
 
 
 # --- DO NOT CHANGE BELOW THIS LINE ----
@@ -105,9 +105,17 @@ mac {
         QMAKE_POST_LINK += "install_name_tool -id @rpath/libnrvolc_debug.$${VER_MAJ}.dylib debug/bin/libnrvolc_debug.dylib $$escape_expand(\\n\\t)"
     }
 
-    greaterThan(QT_MAJOR_VERSION, 5) {
-        message("Compiling KPE on macOS Qt6 x86_64 only")
-        QMAKE_APPLE_DEVICE_ARCHS="x86_64"
+    # build universal binaries when running on Apple Silicon
+    equals(QMAKE_HOST.arch, arm64) {
+        isEmpty(MACOS_ARCHS) {
+            message("Running on Apple Silicon (arm64), building NrVolChanger universal binaries")
+            MACOS_ARCHS = arm64 x86_64
+        } else {
+            message("Running on Apple Silicon (arm64), WARNING, build was forcefully configured to build NrVolChanger for: $$MACOS_ARCHS")
+        }
+        QMAKE_APPLE_DEVICE_ARCHS = $$MACOS_ARCHS
+    } else {
+        message("Running on Intel (x86_64), building NrVolChanger only x86_64 arch")
     }
 }
 

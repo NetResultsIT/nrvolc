@@ -1,0 +1,21 @@
+name: Linux
+on: [push, pull_request]
+jobs:
+  ubuntu:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libasound2-dev libpulse-dev pulseaudio pulseaudio-utils qt6-base-dev
+      - run: tests/linux-integration.sh
+      - run: |
+          for config in debug release; do
+            mkdir -p "$RUNNER_TEMP/lib-$config" "$RUNNER_TEMP/tester-$config"
+            (cd "$RUNNER_TEMP/lib-$config" && qmake6 "$GITHUB_WORKSPACE/lib/lib.pro" CONFIG+="$config" && make -j4)
+            (cd "$RUNNER_TEMP/tester-$config" && qmake6 "$GITHUB_WORKSPACE/tester/tester.pro" CONFIG+="$config" && make -j4)
+          done
+  pipewire:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libasound2-dev libpulse-dev pipewire pipewire-pulse wireplumber pulseaudio-utils dbus-x11
+      - run: dbus-run-session -- tests/pipewire-integration.sh

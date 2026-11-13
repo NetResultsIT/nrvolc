@@ -1,5 +1,5 @@
 
-NRVOLC_VERSION=0.2.1
+NRVOLC_VERSION=0.3.0
 
 
 # --- DO NOT CHANGE BELOW THIS LINE ----
@@ -80,7 +80,8 @@ linux {
     HEADERS += $$PWD/NrVolumeChangerLinux.h
     SOURCES += $$PWD/NrVolumeChangerLinux.cpp
 
-    LIBS += -lasound
+    CONFIG += link_pkgconfig c++11
+    PKGCONFIG += alsa libpulse
 }
 
 mac {
@@ -167,6 +168,7 @@ TARGET = $$join(TARGET,,bin/,)
 
 #final copies
 unix {
+    QMAKE_POST_LINK += "mkdir -p $$DSTDIR $$escape_expand(\\n\\t)"
     QMAKE_POST_LINK += $$quote(cp -aP $$join(DLL,,,.*) $${DSTDIR} $$escape_expand(\\n\\t))
     QMAKE_POST_LINK += "mkdir -p $$INCLUDE_DIR $$escape_expand(\\n\\t)"
     QMAKE_POST_LINK += "cp -aP $$INCLUDE_HEADERS $$INCLUDE_DIR $$escape_expand(\\n\\t)"

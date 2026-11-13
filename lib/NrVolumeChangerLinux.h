@@ -1,25 +1,19 @@
-#ifndef NRVOLC_ALSA_WRAPPER_H
-#define NRVOLC_ALSA_WRAPPER_H
-
-#include <VolumeChanger.h>
-
-class AudioObjectPropertyAddress;
-
-class NRVOLC_LIB_EXPORT NrVolumeChangerLinuxImpl : public NrVolumeChanger
-{
-    int getDefaultInputDeviceId() const;
-    int getDefaultOutputDeviceId() const;
-
-    NrVolcErrorType setInputDeviceVolume(int devId, double percent);
-    NrVolcErrorType getInputDeviceVolume(int devId, double &volume) const;
-    NrVolcErrorType setOutputDeviceVolume(int devId, double percent);
-    NrVolcErrorType getOutputDeviceVolume(int devId, double &volume) const;
+#ifndef NRVOLC_LINUX_H
+#define NRVOLC_LINUX_H
+#include "VolumeChanger.h"
+class NrVolumeChangerLinuxImpl : public NrVolumeChanger {
 public:
-    NrVolumeChangerLinuxImpl(QObject *parent=nullptr);
-    virtual NrVolcErrorType setDefaultInputVolume(double percent) override;
-    virtual NrVolcErrorType getDefaultInputVolume(double &volume) const override;
-    virtual NrVolcErrorType setDefaultOutputVolume(double percent) override;
-    virtual NrVolcErrorType getDefaultOutputVolume(double &volume) const override;
+  NrVolcErrorType setDefaultInputVolume(double) override;
+  NrVolcErrorType getDefaultInputVolume(double &) const override;
+  NrVolcErrorType setDefaultOutputVolume(double) override;
+  NrVolcErrorType getDefaultOutputVolume(double &) const override;
+  NrVolcErrorType getDeviceList(std::map<std::string, std::string> &,
+                                NRVOLC::DeviceType) const override;
+  NrVolcErrorType setInputDeviceVolume(const std::string &, double) override;
+  NrVolcErrorType getInputDeviceVolume(const std::string &,
+                                       double &) const override;
+  NrVolcErrorType setOutputDeviceVolume(const std::string &, double) override;
+  NrVolcErrorType getOutputDeviceVolume(const std::string &,
+                                        double &) const override;
 };
-
 #endif

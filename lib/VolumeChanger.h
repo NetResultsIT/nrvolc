@@ -42,14 +42,12 @@ public:
     virtual NrVolcErrorType setDefaultOutputVolume(double percent) = 0;
     virtual NrVolcErrorType getDefaultOutputVolume(double &volume) const = 0;
     static NrVolumeChanger* getInstance();
-#ifndef Q_OS_LINUX
     virtual NrVolcErrorType getDeviceList(std::map<std::string, std::string> &devices,
                                           NRVOLC::DeviceType=NRVOLC::ANY_DEVICE) const = 0;
     virtual NrVolcErrorType setInputDeviceVolume(const std::string &deviceUid, double percent) = 0;
     virtual NrVolcErrorType getInputDeviceVolume(const std::string &deviceUid, double &volume) const = 0;
     virtual NrVolcErrorType setOutputDeviceVolume(const std::string &deviceUid, double percent) = 0;
     virtual NrVolcErrorType getOutputDeviceVolume(const std::string &deviceUid, double &volume) const = 0;
-#endif
 };
 
 #endif // LIB_H

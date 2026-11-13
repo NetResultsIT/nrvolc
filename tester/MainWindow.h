@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <map>
+#include <string>
 
 class NrVolumeChanger;
 
